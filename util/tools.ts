@@ -31,10 +31,8 @@ export interface ITagPropsMember {
 export type ITagProps = Array<ITagPropsMember>;
 	
 export const addAwsTags = (stack: Stack, stage: string, props: ITagProps ): void => {
-	cdk.Tags.of(stack).add("sz:property", "anywhere-teacher");
-	cdk.Tags.of(stack).add("sz:owner", (stage === "prod" ? "operations" : "development"));
-	cdk.Tags.of(stack).add("sz:version", process.env.AT2_VERSION ? process.env.AT2_VERSION : "");
-	cdk.Tags.of(stack).add("sz:environment", stage);
+	cdk.Tags.of(stack).add("hmg:version", process.env.HMG_VERSION ? process.env.HMG_VERSION : "");
+	cdk.Tags.of(stack).add("hmg:environment", stage);
 	props.forEach((prop) => {
 		cdk.Tags.of(stack).add(prop.tag, prop.value);
 	});

@@ -12,13 +12,12 @@ export default function main(app: sst.App): void {
 	});
 
 	const apiStack = new ApiStack(app, "BaseApi");
-	/*
 	addAwsTags(apiStack, app.stage, [
 			{ tag: "hmg:application", value: "hmg" },
 			{ tag: "hmg:application:component", value: "api" }
 		]
 	);
-	*/
+
 	const frontendStack = new FrontendStack(app, "Web", {
 		api: apiStack.api
 	});
