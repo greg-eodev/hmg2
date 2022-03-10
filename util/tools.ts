@@ -31,6 +31,7 @@ export interface ITagPropsMember {
 export type ITagProps = Array<ITagPropsMember>;
 	
 export const addAwsTags = (stack: Stack, stage: string, props: ITagProps ): void => {
+	console.log("env", JSON.stringify(process.env));
 	cdk.Tags.of(stack).add("hmg:version", process.env.HMG_VERSION ? process.env.HMG_VERSION : "");
 	cdk.Tags.of(stack).add("hmg:environment", stage);
 	console.log('props', JSON.stringify(props))
