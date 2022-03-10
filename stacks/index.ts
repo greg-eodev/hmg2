@@ -1,13 +1,29 @@
-import MyStack from "./MyStack";
+import ApiStack from "./ApiStack";
+import FrontendStack from "./FrontendStack";
+import { addAwsTags } from "../util/tools";
 import * as sst from "@serverless-stack/resources";
 
 export default function main(app: sst.App): void {
-  // Set default runtime for all functions
-  app.setDefaultFunctionProps({
-    runtime: "nodejs14.x"
-  });
+	/**
+	 * Set default Node runtime across all functions
+	 */
+	app.setDefaultFunctionProps({
+		runtime: "nodejs14.x"
+	});
 
-  new MyStack(app, "my-stack");
+	const apiStack = new ApiStack(app, "BaseApi");
+	addAwsTags(apiStack, app.stage, [
+			{ tag: "hmg:application", value: "hmg" },
+			{ tag: "hmg:application:component", value: "api" }
+		]
+	);
 
-  // Add more stacks
+	const frontendStack = new FrontendStack(app, "Web", {
+		api: apiStack.api
+	});
+	addAwsTags(frontendStack, app.stage, [
+			{ tag: "hmg:application", value: "hmg" },
+			{ tag: "hmg:application:component", value: "website" }
+		]
+	);
 }
