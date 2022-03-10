@@ -21,11 +21,9 @@ export default function main(app: sst.App): void {
 	const frontendStack = new FrontendStack(app, "Web", {
 		api: apiStack.api
 	});
-	/*
 	addAwsTags(frontendStack, app.stage, [
 			{ tag: "hmg:application", value: "hmg" },
 			{ tag: "hmg:application:component", value: "website" }
 		]
 	);
-	*/
 }
