@@ -1,7 +1,5 @@
 import Container from "@mui/material/Container";
 import Box from "@mui/material/Box";
-import Grid from "@mui/material/Grid";
-import Link from "@mui/material/Link";
 import Typography from "@mui/material/Typography";
 import AppBar from '@mui/material/AppBar';
 import Toolbar from "@mui/material/Toolbar";
@@ -9,10 +7,25 @@ import IconButton from "@mui/material/IconButton";
 import MenuIcon from '@mui/icons-material/Menu';
 import SearchIcon from '@mui/icons-material/Search';
 import MoreIcon from '@mui/icons-material/MoreVert';
+import Drawer from "@mui/material/Drawer";
+import Button from "@mui/material/Button";
+import List from "@mui/material/List";
+import Divider from "@mui/material/Divider";
+import ListItem from "@mui/material/ListItem";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import ListItemText from "@mui/material/ListItemText";
+import InboxIcon from "@mui/icons-material/MoveToInbox";
+import MailIcon from "@mui/icons-material/Mail";
+import MusicNoteIcon from '@mui/icons-material/MusicNote';
+import LibraryMusicIcon from '@mui/icons-material/LibraryMusic';
+import SchoolIcon from '@mui/icons-material/School';
+import SettingsInputSvideoIcon from '@mui/icons-material/SettingsInputSvideo';
+import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
+import React from "react";
 
 const Copyright = () => {
 	return (
-		<Typography variant="body2" color="text.secondary" align="center">
+		<Typography variant="body2" color="white" align="center">
 			{'Copyright © 2016 - '}
 			{new Date().getFullYear()}
 			&nbsp;Radical Data and Media LLC
@@ -20,84 +33,91 @@ const Copyright = () => {
 		</Typography>
 	);
 }
-/*
-const Footer = () => {
-	return (
-		<footer>
-			<Box bgcolor="text.secondary" color="white">
-				<Container maxWidth="lg">
-					<Grid container spacing={5}>
-						<Grid item xs={12} sm={4}>
-							<Box borderBottom={1}>Help</Box>
-							<Box>
-								<Link href="/" color="inherit">
-									Contact
-								</Link>
-							</Box>
-							<Box>
-								<Link href="/" color="inherit">
-									Support
-								</Link>
-							</Box>
-							<Box>
-								<Link href="/" color="inherit">
-									Privacy
-								</Link>
-							</Box>
-						</Grid>
-						<Grid item xs={12} sm={4}>
-							<Box borderBottom={1}>Account</Box>
-							<Box>
-								<Link href="/" color="inherit">
-									Login
-								</Link>
-							</Box>
-							<Box>
-								<Link href="/" color="inherit">
-									Create
-								</Link>
-							</Box>
-						</Grid>
-						<Grid item xs={12} sm={4}>
-							<Box borderBottom={1}>Tools</Box>
-							<Box>
-								<Link href="/" color="inherit">
-									Harmonagon
-								</Link>
-							</Box>
-							<Box>
-								<Link href="/" color="inherit">
-									API
-								</Link>
-							</Box>
-						</Grid>
-					</Grid>
-					<Box textAlign="center">
-						<Copyright />
-					</Box>
-				</Container>
-			</Box>
-		</footer>
-	);
-}
-*/
 
 const Footer = () => {
+	const [state, setState] = React.useState({
+		"left": false,
+	});
+
+	const toggleDrawer = (anchor: string, open: boolean) => (event: any) => {
+		if (event.type === "keydown" && (event.key === "Tab" || event.key === "Shift")) {
+			return;
+		}
+
+		setState({ ...state, [anchor]: open });
+	};
+
+	const list = (anchor: string) => (
+		<Box
+			sx={{ width: 250 }}
+			role="presentation"
+			onClick={toggleDrawer(anchor, false)}
+			onKeyDown={toggleDrawer(anchor, false)}
+		>
+		<List>
+			<ListItem button key={"Harmonagon"}>
+				<ListItemIcon>
+					<PlayCircleOutlineIcon />
+				</ListItemIcon>
+				<ListItemText primary={"Harmonagon"} />
+			</ListItem>
+			<ListItem button key={"Music"}>
+				<ListItemIcon>
+					<MusicNoteIcon />
+				</ListItemIcon>
+				<ListItemText primary={"Music"} />
+			</ListItem>
+			<ListItem button key={"Library"}>
+				<ListItemIcon>
+					<LibraryMusicIcon />
+				</ListItemIcon>
+				<ListItemText primary={"Library"} />
+			</ListItem>
+		</List>
+		<Divider />
+		<List>
+			<ListItem button key={"Learning"}>
+				<ListItemIcon>
+					<SchoolIcon />
+				</ListItemIcon>
+				<ListItemText primary={"Learning"} />
+			</ListItem>
+			<ListItem button key={"MIDI"}>
+				<ListItemIcon>
+					<SettingsInputSvideoIcon />
+				</ListItemIcon>
+				<ListItemText primary={"MIDI"} />
+			</ListItem>
+		</List>
+		</Box>
+	);
+
 	return (
-		<AppBar position="fixed" color="primary" sx={{ top: 'auto', bottom: 0 }}>
-			<Toolbar>
-			<IconButton color="inherit" aria-label="open drawer">
-				<MenuIcon />
-			</IconButton>
-			<Box sx={{ flexGrow: 1 }} />
-			<IconButton color="inherit">
-				<SearchIcon />
-			</IconButton>
-			<IconButton color="inherit">
-				<MoreIcon />
-			</IconButton>
-			</Toolbar>
-		</AppBar>
+		<React.Fragment>
+			<AppBar position="fixed" color="primary" sx={{ top: 'auto', bottom: 4 }}>
+				<Toolbar>
+					<IconButton color="inherit" aria-label="open drawer" onClick={toggleDrawer("left", true)}>
+						<MenuIcon />
+					</IconButton>
+					<Box textAlign="center" sx={{ flexGrow: 1 }}>
+						<Copyright />
+					</Box>
+					<IconButton color="inherit">
+						<SearchIcon />
+					</IconButton>
+					<IconButton color="inherit">
+						<MoreIcon />
+					</IconButton>
+				</Toolbar>
+			</AppBar>
+			<Drawer
+				anchor="left"
+				open={state["left"]}
+				onClose={toggleDrawer("left", false)}
+			>
+				{list("left")}
+			</Drawer>
+		</React.Fragment>
 	);
 }
 
