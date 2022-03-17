@@ -1,12 +1,12 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import { store } from './app/store';
-import { Provider } from 'react-redux';
-import CssBaseline from '@mui/material/CssBaseline';
-import { ThemeProvider } from '@mui/material/styles';
-import * as serviceWorker from './serviceWorker';
-import App from './App';
-import theme from './theme';
+import React from "react";
+import ReactDOM from "react-dom";
+import { store } from "./app/store";
+import { Provider } from "react-redux";
+import CssBaseline from "@mui/material/CssBaseline";
+import { ThemeProvider } from "@mui/material/styles";
+import * as serviceWorker from "./serviceWorker";
+import App from "./App";
+import theme from "./theme";
 
 
 ReactDOM.render(
@@ -19,7 +19,7 @@ ReactDOM.render(
 			</ThemeProvider>
 		</Provider>
 	</React.StrictMode>,
-  	document.querySelector('#root')
+  	document.querySelector("#root")
 );
 
 // If you want your app to work offline and load faster, you can change
