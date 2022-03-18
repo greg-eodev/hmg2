@@ -1,4 +1,4 @@
-import { configureStore, ThunkAction, Action, getDefaultMiddleware } from '@reduxjs/toolkit';
+import { configureStore, ThunkAction, Action } from '@reduxjs/toolkit';
 import mainDrawerSlice from "../slices/mainDrawerSlice";
 import drawSlice from "../slices/drawSlice";
 

@@ -1,10 +1,11 @@
 import Phaser from "phaser";
 
 class HMG extends Phaser.Game {
-	public init: number;
+	public version: string;
+
 	constructor(config: Phaser.Types.Core.GameConfig) {
 		super(config);
-		this.init = 1;
+		this.version = "2.0.0-dev.1";
 	}
 }
 
