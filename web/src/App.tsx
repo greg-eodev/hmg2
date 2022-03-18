@@ -7,8 +7,11 @@ import Link from "@mui/material/Link";
  */
 import Footer from "./containers/Footer";
 import MainDrawer from "./components/MainDrawer";
+import Draw from "./components/Draw";
+
 
 const App = () => {
+
 	return (
 		<Container maxWidth="lg">
 			<Box>
@@ -19,6 +22,7 @@ const App = () => {
 					Welcome the the rebirth ... re-emergence ... re-something of<br />
 					<strong><Link color="inherit" href="http://harmonagon.com/">The Harmonagon Project</Link></strong>
 				</p>
+				<Draw />
 				<Footer />
 			</Box>
 			<MainDrawer />
