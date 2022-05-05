@@ -14,7 +14,7 @@ import GM from "./classes/GM";
 const App = () => {
 
 	const generalMidi = new GM();
-	console.log("General Midi: ", generalMidi);
+	console.log("Midi: ", generalMidi);
 
 	return (
 		<Container maxWidth="lg">
