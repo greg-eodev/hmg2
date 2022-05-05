@@ -8,9 +8,13 @@ import Link from "@mui/material/Link";
 import Footer from "./containers/Footer";
 import MainDrawer from "./components/MainDrawer";
 import Draw from "./components/Draw";
+import GM from "./classes/GM";
 
 
 const App = () => {
+
+	const generalMidi = new GM();
+	console.log("General Midi: ", generalMidi);
 
 	return (
 		<Container maxWidth="lg">
