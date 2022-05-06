@@ -1,3 +1,4 @@
+import { constant } from "lodash";
 import GMChannel from "./GMChannel";
 
 interface IMidiInstrument {
@@ -45,6 +46,14 @@ interface IChannels {
 	[index: number]: IChannelItem;
 }
 
+interface IAudioSupport {
+	webMIDI: boolean;
+	webAudio: boolean;
+	audioTag: boolean;
+	vorbis: string;
+	mpeg: string;
+}
+
 class GM {
 	public byId: IMidiById;
 	public byName: IMidiByName;
@@ -53,6 +62,7 @@ class GM {
 	public noteToKey: INoteToKey;
 	public channels: IChannels;
 	private instruments: IInstruments;
+	private audioSupport: IAudioSupport;
 
 	constructor () {
 		this.instruments = {
@@ -85,6 +95,15 @@ class GM {
 
 		this.channels = {};
 		this.initChannels();
+
+		this.audioSupport = {
+			webMIDI: false,
+			webAudio: false,
+			audioTag: false,
+			vorbis: "",
+			mpeg: ""		
+		}
+		this.detectAudioSupport();
 	}
 
 	clean = (name: string): string => {
@@ -134,6 +153,34 @@ class GM {
 	initChannels = (): void => {
 		for (let channelId = 0; channelId < 16; channelId++) {
 			this.channels[channelId] = new GMChannel(channelId);
+		}
+	}
+
+	detectAudioSupport = (): void => {
+		/**
+		 * Detect if Web Audio API is natively supported
+		 * TODO: may need to add window.webkitAudioContext into check but it should be long deprecated from modern browsers
+		 */
+		if (window.AudioContext) {
+			this.audioSupport.webAudio = true;
+		}
+		/**
+		 * Detect if Web MIDI API is natively supported
+		 */
+		if (navigator.requestMIDIAccess) {
+			this.audioSupport.webMIDI = (Function.prototype.toString.call(navigator.requestMIDIAccess).indexOf("[native code]") > -1);
+		}
+		/**
+		 * Confirm <audio> tag is supported
+		 */
+		if (typeof Audio !== "undefined") {
+			this.audioSupport.audioTag = true;
+
+			const audio = new Audio();
+			if (typeof audio.canPlayType !== "undefined") {
+				this.audioSupport.vorbis = audio.canPlayType("audio/ogg; codecs=\"vorbis\"");
+				this.audioSupport.mpeg = audio.canPlayType("audio/mpeg");
+			}
 		}
 	}
 }
