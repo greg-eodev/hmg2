@@ -1,4 +1,3 @@
-import { constant } from "lodash";
 import GMChannel from "./GMChannel";
 
 interface IMidiInstrument {
