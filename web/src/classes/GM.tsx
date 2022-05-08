@@ -1,3 +1,11 @@
+/**
+ * #### MidiTS - Modern Midi for the Modern Browser
+ * + Built with Typescript
+ * 
+ * Derived from the hardwork of others and the MidiJS library (https://galactic.ink/midi-js/) and
+ * https://github.com/mudcube/MIDI.js/ - thanks MudCube!
+ * 
+ */
 import GMChannel from "./GMChannel";
 
 interface IMidiInstrument {
@@ -54,17 +62,17 @@ interface IAudioSupport {
 }
 
 class GM {
-	public byId: IMidiById;
-	public byName: IMidiByName;
-	public byCategory: IMidiByCategory;
-	public keyToNote: IKeyToNote;
-	public noteToKey: INoteToKey;
-	public channels: IChannels;
-	private instruments: IInstruments;
-	private audioSupport: IAudioSupport;
+	private _byId: IMidiById;
+	private _byName: IMidiByName;
+	private _byCategory: IMidiByCategory;
+	private _keyToNote: IKeyToNote;
+	private _noteToKey: INoteToKey;
+	private _channels: IChannels;
+	private _instruments: IInstruments;
+	private _audioSupport: IAudioSupport;
 
 	constructor () {
-		this.instruments = {
+		this._instruments = {
 			'Piano': ['1 Acoustic Grand Piano', '2 Bright Acoustic Piano', '3 Electric Grand Piano', '4 Honky-tonk Piano', '5 Electric Piano 1', '6 Electric Piano 2', '7 Harpsichord', '8 Clavinet'],
 			'Chromatic Percussion': ['9 Celesta', '10 Glockenspiel', '11 Music Box', '12 Vibraphone', '13 Marimba', '14 Xylophone', '15 Tubular Bells', '16 Dulcimer'],
 			'Organ': ['17 Drawbar Organ', '18 Percussive Organ', '19 Rock Organ', '20 Church Organ', '21 Reed Organ', '22 Accordion', '23 Harmonica', '24 Tango Accordion'],
@@ -83,19 +91,19 @@ class GM {
 			'Sound effects': ['120 Reverse Cymbal', '121 Guitar Fret Noise', '122 Breath Noise', '123 Seashore', '124 Bird Tweet', '125 Telephone Ring', '126 Helicopter', '127 Applause', '128 Gunshot']
 		}
 
-		this.byId = {};
-		this.byName = {};
-		this.byCategory = {};
+		this._byId = {};
+		this._byName = {};
+		this._byCategory = {};
 		this.initMidiInstrumentLists();
 
-		this.keyToNote = {}; // C8  == 108
-		this.noteToKey = {}; // 108 ==  C8
+		this._keyToNote = {}; // C8  == 108
+		this._noteToKey = {}; // 108 ==  C8
 		this.initNoteMapping();
 
-		this.channels = {};
+		this._channels = {};
 		this.initChannels();
 
-		this.audioSupport = {
+		this._audioSupport = {
 			webMIDI: false,
 			webAudio: false,
 			audioTag: false,
@@ -105,27 +113,52 @@ class GM {
 		this.detectAudioSupport();
 	}
 
+	// #region : Getters and Setters
+	public get byId (): IMidiById {
+		return this._byId
+	}
+
+	public get byName (): IMidiByName {
+		return this._byName
+	}
+
+	public get byCategory (): IMidiByCategory {
+		return this._byCategory
+	}
+	
+	public get keyToNote (): IKeyToNote {
+		return this._keyToNote
+	}
+	
+	public get noteToKey (): INoteToKey {
+		return this._noteToKey
+	}
+	
+	public get channels (): IChannels {
+		return this._channels
+	}
+	// #endregion
+
 	clean = (name: string): string => {
 		return name.replace(/[^a-z0-9 ]/gi, '').replace(/[ ]/g, '_').toLowerCase();
-
 	}
 
 	initMidiInstrumentLists = (): void => {
 		let instrument: string;
 		let instrumentNumber: number;
-		for (let listKey in this.instruments) {
-			let list: InstrumentList = this.instruments[listKey];
+		for (let listKey in this._instruments) {
+			let list: InstrumentList = this._instruments[listKey];
 			for (let listEntry = 0; listEntry < list.length; listEntry++) {
 				instrument = list[listEntry];
 				if (!instrument) continue;
 				instrumentNumber = parseInt(instrument.substr(0, instrument.indexOf(' ')), 10);
 				instrument = instrument.replace(instrumentNumber + ' ', '');
-				if (!this.byCategory[this.clean(listKey)]) {
-                    this.byCategory[this.clean(listKey)] = {};
+				if (!this._byCategory[this.clean(listKey)]) {
+                    this._byCategory[this.clean(listKey)] = {};
                 }
-				this.byId[--instrumentNumber] = 
-				this.byName[this.clean(instrument)] = 
-				this.byCategory[this.clean(listKey)][this.clean(instrument)] = {
+				this._byId[--instrumentNumber] = 
+				this._byName[this.clean(instrument)] = 
+				this._byCategory[this.clean(listKey)][this.clean(instrument)] = {
 					id: this.clean(instrument),
 					instrument: instrument,
 					number: instrumentNumber,
@@ -144,44 +177,57 @@ class GM {
 		for (var note = A0; note <= C8; note++) {
 			octave = (note - 12) / 12 >> 0;
 			name = number2key[note % 12] + octave;
-			this.keyToNote[name] = note;
-			this.noteToKey[note] = name;
+			this._keyToNote[name] = note;
+			this._noteToKey[note] = name;
 		}		
 	}
 
 	initChannels = (): void => {
 		for (let channelId = 0; channelId < 16; channelId++) {
-			this.channels[channelId] = new GMChannel(channelId);
+			this._channels[channelId] = new GMChannel(channelId);
 		}
 	}
 
 	detectAudioSupport = (): void => {
 		/**
 		 * Detect if Web Audio API is natively supported
-		 * TODO: may need to add window.webkitAudioContext into check but it should be long deprecated from modern browsers
+		 * + this will be our primary support for audio playback in web browsers
+		 * + all major/modern browser support natively - https://caniuse.com/?search=Web%20Audio%20API
+		 * 
+		 * NOTE: used to use window.webkitAudioContext in check but that should be long deprecated from 
+		 * modern browsers in favor of AudioContext - see original audioDetect.js for reference if necessary
 		 */
 		if (window.AudioContext) {
-			this.audioSupport.webAudio = true;
+			this._audioSupport.webAudio = true;
 		}
 		/**
 		 * Detect if Web MIDI API is natively supported
+		 * + still unsupported by Safari and Firefox for security concerns
 		 */
 		if (navigator.requestMIDIAccess) {
-			this.audioSupport.webMIDI = (Function.prototype.toString.call(navigator.requestMIDIAccess).indexOf("[native code]") > -1);
+			this._audioSupport.webMIDI = (Function.prototype.toString.call(navigator.requestMIDIAccess).indexOf("[native code]") > -1);
 		}
 		/**
-		 * Confirm <audio> tag is supported
+		 * Confirm <audio> tag is supported - if you're using a browser that doesn't have the HTML <audio> tag WTF?
+		 * But we will check just in case - although we should never have to use it and wont actually write code to 
+		 * use it - so yeah there is that.
 		 */
 		if (typeof Audio !== "undefined") {
-			this.audioSupport.audioTag = true;
+			this._audioSupport.audioTag = true;
 
 			const audio = new Audio();
 			if (typeof audio.canPlayType !== "undefined") {
-				this.audioSupport.vorbis = audio.canPlayType("audio/ogg; codecs=\"vorbis\"");
-				this.audioSupport.mpeg = audio.canPlayType("audio/mpeg");
+				this._audioSupport.vorbis = audio.canPlayType("audio/ogg; codecs=\"vorbis\"");
+				this._audioSupport.mpeg = audio.canPlayType("audio/mpeg");
 			}
 		}
 	}
+
+	getAudioSupport = (): IAudioSupport => {
+		return this._audioSupport;
+	}
+
+	
 }
 
 export default GM;
