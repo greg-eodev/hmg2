@@ -4,6 +4,7 @@ import GM from "../classes/GM";
 interface IPlayerState {
 	baseUrl: string;
 	isLoaded: boolean;
+	isLoading: boolean;
 	isAvailable: boolean;
 	isPlaying: boolean;
 }
@@ -11,16 +12,17 @@ interface IPlayerState {
 const initialState: IPlayerState = {
 	baseUrl: "https://sounds.steptunes.com",
 	isLoaded: false,
+	isLoading: false,
 	isAvailable: false,
 	isPlaying: false
 }
-
 
 export interface ISoundFontPayload {
 	fontFamily: string;
 	instrument: Array<string>;
 	format: "mp3" | "ogg";
 	compressed: boolean;
+	loadCallback: Function;
 }
 
 const midiPlayerSlice = createSlice({
@@ -45,19 +47,24 @@ const midiPlayerSlice = createSlice({
 			let source: string = "";
 			let loadSound;
 			if (action.payload.instrument.length > 0) {
+				state.isLoading = true;
 				action.payload.instrument.forEach((instrument: string) => {
-					source = state.baseUrl + "/" + action.payload.fontFamily + "/" + instrument + "-" + action.payload.format + ".js" + compressionExtension;
+					source = `${state.baseUrl}/${action.payload.fontFamily}/${instrument}-${action.payload.format}.js${compressionExtension}`;
 					loadSound = document.createElement("script");
 					loadSound.type = "text/javascript";
 					loadSound.src = source;
 					document.body.appendChild(loadSound);
-				})
-				state.isLoaded = true;
+					loadSound.onload = () => { action.payload.loadCallback(); }
+				});
 			}
+		},
+		loadSoundFontComplete: (state) => {
+			state.isLoading = false;
+			state.isLoaded = true;
 		}
 	}
 });
 
-export const { setPlayer, loadSoundFont } = midiPlayerSlice.actions;
+export const { setPlayer, loadSoundFont, loadSoundFontComplete } = midiPlayerSlice.actions;
 
 export default midiPlayerSlice.reducer;

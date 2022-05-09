@@ -1,4 +1,5 @@
 import { configureStore, ThunkAction, Action } from '@reduxjs/toolkit';
+import { logger } from "redux-logger";
 import mainDrawerSlice from "../slices/mainDrawerSlice";
 import drawSlice from "../slices/drawSlice";
 import midiPlayerSlice from "../slices/midiPlayerSlice";
@@ -14,10 +15,10 @@ export const store = configureStore({
 	middleware: (getDefaultMiddleware) => 
 		getDefaultMiddleware({
 			serializableCheck: {
-				ignoredActionPaths: ['payload.phaser'],
-				ignoredPaths: ['draw.phaser'],
+				ignoredActionPaths: ["payload.phaser", "payload.loadCallback"],
+				ignoredPaths: ["draw.phaser"],
 			}
-		}).concat(soundFontSlice.middleware)
+		}).concat(logger, soundFontSlice.middleware)
 });
 
 export type AppDispatch = typeof store.dispatch;
