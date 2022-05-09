@@ -43,16 +43,14 @@ const midiPlayerSlice = createSlice({
 			state.isAvailable = true;
 		},
 		loadSoundFont: (state, action) => {
-			const compressionExtension = action.payload.compressed ? ".gz" : "";
-			let source: string = "";
-			let loadSound;
+			const compressionExtension: string = action.payload.compressed ? ".gz" : "";
+			let loadSound: HTMLScriptElement;
 			if (action.payload.instrument.length > 0) {
 				state.isLoading = true;
 				action.payload.instrument.forEach((instrument: string) => {
-					source = `${state.baseUrl}/${action.payload.fontFamily}/${instrument}-${action.payload.format}.js${compressionExtension}`;
 					loadSound = document.createElement("script");
 					loadSound.type = "text/javascript";
-					loadSound.src = source;
+					loadSound.src = `${state.baseUrl}/${action.payload.fontFamily}/${instrument}-${action.payload.format}.js${compressionExtension}`;
 					document.body.appendChild(loadSound);
 					loadSound.onload = () => { action.payload.loadCallback(); }
 				});

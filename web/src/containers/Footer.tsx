@@ -21,7 +21,7 @@ const Copyright = () => {
 		<Typography variant="body2" color="white" align="center">
 			{"Copyright © 2016 - "}
 			{new Date().getFullYear()}
-			&nbsp;The Harmonagon Collective.
+			&nbsp;The StepTunes Initiative.
 		</Typography>
 	);
 }

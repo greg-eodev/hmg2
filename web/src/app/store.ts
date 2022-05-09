@@ -3,14 +3,12 @@ import { logger } from "redux-logger";
 import mainDrawerSlice from "../slices/mainDrawerSlice";
 import drawSlice from "../slices/drawSlice";
 import midiPlayerSlice from "../slices/midiPlayerSlice";
-import { soundFontSlice } from "../slices/soundFontSlice";
 
 export const store = configureStore({
 	reducer: {
 		drawer: mainDrawerSlice,
 		draw: drawSlice,
-		midi: midiPlayerSlice,
-		[soundFontSlice.reducerPath]: soundFontSlice.reducer
+		midi: midiPlayerSlice
 	},
 	middleware: (getDefaultMiddleware) => 
 		getDefaultMiddleware({
@@ -18,7 +16,7 @@ export const store = configureStore({
 				ignoredActionPaths: ["payload.phaser", "payload.loadCallback"],
 				ignoredPaths: ["draw.phaser"],
 			}
-		}).concat(logger, soundFontSlice.middleware)
+		}).concat(logger)
 });
 
 export type AppDispatch = typeof store.dispatch;

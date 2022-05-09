@@ -16,7 +16,10 @@ const App = () => {
 		<Container maxWidth="lg">
 			<Box>
 				<Typography variant="h4" component="h1" gutterBottom>
-					Harmonagon Redux
+					StepTunes
+				</Typography>				
+				<Typography variant="h6" component="h1" gutterBottom>
+					Something completely different!
 				</Typography>
 				<p>
 					Welcome the the rebirth ... re-emergence ... re-something of<br />
