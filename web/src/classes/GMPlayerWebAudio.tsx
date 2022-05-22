@@ -129,7 +129,7 @@ class GMPlayerWebAudio extends GMPlayer {
 		source.buffer = buffer;
 		source.connect(this.context.destination);
 		source.start(delay);
-	 };
+	};
 
 	public noteOff = (channelId: number, noteId: string, delay: number): void => { };
 	public chordOn = (channelId: number, chord: string, velocity: number, delay: number): void => { };
