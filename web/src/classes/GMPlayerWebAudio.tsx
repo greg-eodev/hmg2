@@ -108,8 +108,6 @@ class GMPlayerWebAudio extends GMPlayer {
 	public pitchBend = (channelId: number, program: number, delay: number): void => { };
 
 	public noteOn = (channelId: number, noteId: string, velocity: number, delay?: number): void => {
-		const MIDI = window.MIDI;
-
 		console.log("NoteOn: Entry", channelId, noteId, velocity, delay);
 
 		delay = delay || 0;
