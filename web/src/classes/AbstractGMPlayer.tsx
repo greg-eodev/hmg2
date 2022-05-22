@@ -9,8 +9,10 @@ export interface IOptions {
 */
 abstract class GMPlayer {
 
-	constructor() {
+	public active: boolean;
 
+	constructor() {
+		this.active = true;
 	}
 
 	// TODO: specific for webAudio player => abstract setEffects (list: Array<string>): void;
