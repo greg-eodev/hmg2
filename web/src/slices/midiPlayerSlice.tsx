@@ -7,6 +7,7 @@ export interface IPlayerState {
 	isLoading: boolean;
 	isAvailable: boolean;
 	isPlaying: boolean;
+	areAudioBuffersLoaded: boolean;
 }
 
 export type SoundFormat = "mp3" | "ogg";
@@ -18,12 +19,26 @@ export interface ISoundFontPayload {
 	loadCallback: Function;
 }
 
+export interface ISoundItem {
+	instrumentId: number;
+	note: string;
+	velocity: number;
+	delay: number;
+	duration: number;
+}
+
+export interface ISequencePayload {
+	channelId: number,
+	sequence: Array<ISoundItem>
+}
+
 const initialState: IPlayerState = {
 	baseUrl: "https://sounds.steptunes.com",
 	isLoaded: false,
 	isLoading: false,
 	isAvailable: false,
-	isPlaying: false
+	isPlaying: false,
+	areAudioBuffersLoaded: false
 }
 
 const midiPlayerSlice = createSlice({
@@ -70,21 +85,42 @@ const midiPlayerSlice = createSlice({
 			};
 			const midiChannel = 0;
 			window.MIDI.channels[midiChannel].player.connect(options);
+			const intstrumentId = window.MIDI.getInstrumentIDbyName('acoustic_grand_piano');
+			state.areAudioBuffersLoaded = true;
 			setTimeout(() => {
-				window.MIDI.channels[midiChannel].player.noteOn(0, 'C4', 0, 0)
-				window.MIDI.channels[midiChannel].player.noteOn(0, 'E4', 0, 0)
-				window.MIDI.channels[midiChannel].player.noteOn(0, 'G4', 0, 0)
-				window.MIDI.channels[midiChannel].player.noteOn(0, 'B5', 0, 0)
+				window.MIDI.channels[midiChannel].player.noteOn(intstrumentId, 'C4', 0, 0)
+				window.MIDI.channels[midiChannel].player.noteOn(intstrumentId, 'E4', 0, 0)
+				window.MIDI.channels[midiChannel].player.noteOn(intstrumentId, 'G4', 0, 0)
+				window.MIDI.channels[midiChannel].player.noteOn(intstrumentId, 'B5', 0, 0)
 
-				window.MIDI.channels[midiChannel].player.noteOn(0, 'D4', 0, 2)
-				window.MIDI.channels[midiChannel].player.noteOn(0, 'F4', 0, 2)
-				window.MIDI.channels[midiChannel].player.noteOn(0, 'A4', 0, 2)
-				window.MIDI.channels[midiChannel].player.noteOn(0, 'C5', 0, 2)
+				window.MIDI.channels[midiChannel].player.noteOn(intstrumentId, 'D4', 0, 2)
+				window.MIDI.channels[midiChannel].player.noteOn(intstrumentId, 'F4', 0, 2)
+				window.MIDI.channels[midiChannel].player.noteOn(intstrumentId, 'A4', 0, 2)
+				window.MIDI.channels[midiChannel].player.noteOn(intstrumentId, 'C5', 0, 2)
 			}, 300);
+		}, 
+		playSequence: (state, action) => {
+			console.log("Play Sequence", action.payload);
+			const MIDI = window.MIDI;
+			if (state.isLoaded && state.areAudioBuffersLoaded) {
+				//
+				// TODO: implement isPlaying, clearSequence, etc
+				//
+				action.payload.sequence.forEach((soundItem: any) => {
+					console.log("Sound Item", soundItem);
+					MIDI.channels[action.payload.channelId].player.noteOn(
+						soundItem.instrumentId, 
+						soundItem.note, 
+						soundItem.velocity,
+						soundItem.delay,
+						soundItem.duration,
+					);
+				});
+			}
 		}
 	}
 });
 
-export const { setPlayer, loadSoundFont, loadSoundFontComplete } = midiPlayerSlice.actions;
+export const { setPlayer, loadSoundFont, loadSoundFontComplete, playSequence } = midiPlayerSlice.actions;
 
 export default midiPlayerSlice.reducer;

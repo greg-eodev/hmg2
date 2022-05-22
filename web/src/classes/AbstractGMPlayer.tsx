@@ -24,7 +24,7 @@ abstract class GMPlayer {
 	abstract setVolume (channelId: number, volume: number, delay: number): void;
 	abstract programChange (channelId: number, program: number, delay: number): void;
 	abstract pitchBend (channelId: number, program: number, delay: number): void;
-	abstract noteOn (channelId: number, noteId: string, velocity: number, delay: number): void;
+	abstract noteOn (instrumentId: number, noteId: string, velocity: number, delay: number): void;
 	abstract noteOff (channelId: number, noteId: string, delay: number): void;
 	abstract chordOn (channelId: number, chord: string, velocity: number, delay: number): void;
 	abstract chordOff (channelId: number, chord: string, delay: number): void;

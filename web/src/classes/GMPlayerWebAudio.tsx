@@ -107,26 +107,20 @@ class GMPlayerWebAudio extends GMPlayer {
 	public programChange = (channelId: number, program: number, delay: number): void => { };
 	public pitchBend = (channelId: number, program: number, delay: number): void => { };
 
-	public noteOn = (channelId: number, noteId: string, velocity: number, delay?: number): void => {
-		console.log("NoteOn: Entry", channelId, noteId, velocity, delay);
+	public noteOn = (instrumentId: number, note: string, velocity: number, delay: number = 0, duration: number = 1.5): void => {
+		
+		delay += this.context.currentTime;
 
-		delay = delay || 0;
-		/**
-		 * TODO: support instrument selection for multi-voice channels
-		 */
-		var instrument = 0;
-		var bufferId = this.generateAudioBufferId(instrument, noteId);
-		var buffer = this.audioBuffers[bufferId];
-		if (!buffer) {
- 			console.log("No buffer Found", bufferId, instrument, channelId);
+		const bufferId = this.generateAudioBufferId(instrumentId, note);
+		if (!this.audioBuffers[bufferId]) {
+ 			console.error("No Buffer Found for ID =", bufferId);
 			return;
 		}
-		console.log("Buffer found",  buffer);
 
 		const source = this.context.createBufferSource();
-		source.buffer = buffer;
+		source.buffer = this.audioBuffers[bufferId];
 		source.connect(this.context.destination);
-		source.start(delay);
+		source.start(delay, 0, duration);
 	};
 
 	public noteOff = (channelId: number, noteId: string, delay: number): void => { };
