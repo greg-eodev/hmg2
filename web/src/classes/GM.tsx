@@ -5,6 +5,7 @@
  * Derived from the hardwork of others and the MidiJS library (https://galactic.ink/midi-js/) and
  * https://github.com/mudcube/MIDI.js/ - thanks MudCube!
  * 
+ * TODO: make t.ds file for GM
  */
 import GMChannel from "./GMChannel";
 
@@ -53,7 +54,7 @@ interface IChannels {
 	[index: number]: IChannelItem;
 }
 
-interface IAudioSupport {
+export interface IAudioSupport {
 	webMIDI: boolean;
 	webAudio: boolean;
 	audioTag: boolean;
@@ -91,6 +92,15 @@ class GM {
 			'Sound effects': ['120 Reverse Cymbal', '121 Guitar Fret Noise', '122 Breath Noise', '123 Seashore', '124 Bird Tweet', '125 Telephone Ring', '126 Helicopter', '127 Applause', '128 Gunshot']
 		}
 
+		this._audioSupport = {
+			webMIDI: false,
+			webAudio: false,
+			audioTag: false,
+			vorbis: "",
+			mpeg: ""		
+		}
+		this.detectAudioSupport();
+
 		this._byId = {};
 		this._byName = {};
 		this._byCategory = {};
@@ -102,15 +112,6 @@ class GM {
 
 		this._channels = {};
 		this.initChannels();
-
-		this._audioSupport = {
-			webMIDI: false,
-			webAudio: false,
-			audioTag: false,
-			vorbis: "",
-			mpeg: ""		
-		}
-		this.detectAudioSupport();
 	}
 
 	// #region : Getters and Setters
@@ -184,7 +185,7 @@ class GM {
 
 	initChannels = (): void => {
 		for (let channelId = 0; channelId < 16; channelId++) {
-			this._channels[channelId] = new GMChannel(channelId);
+			this._channels[channelId] = new GMChannel(channelId, this._audioSupport);
 		}
 	}
 
@@ -227,7 +228,9 @@ class GM {
 		return this._audioSupport;
 	}
 
-	
+	getInstrumentIDbyName = (instrumentName: string): number => {
+		return this._byName[instrumentName].number
+	}
 }
 
 export default GM;

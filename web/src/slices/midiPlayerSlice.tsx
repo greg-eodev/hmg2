@@ -1,12 +1,21 @@
 import { createSlice } from "@reduxjs/toolkit";
 import GM from "../classes/GM";
 
-interface IPlayerState {
+export interface IPlayerState {
 	baseUrl: string;
 	isLoaded: boolean;
 	isLoading: boolean;
 	isAvailable: boolean;
 	isPlaying: boolean;
+}
+
+export type SoundFormat = "mp3" | "ogg";
+export interface ISoundFontPayload {
+	fontFamily: string;
+	instrument: Array<string>;
+	format: SoundFormat;
+	compressed: boolean;
+	loadCallback: Function;
 }
 
 const initialState: IPlayerState = {
@@ -15,14 +24,6 @@ const initialState: IPlayerState = {
 	isLoading: false,
 	isAvailable: false,
 	isPlaying: false
-}
-
-export interface ISoundFontPayload {
-	fontFamily: string;
-	instrument: Array<string>;
-	format: "mp3" | "ogg";
-	compressed: boolean;
-	loadCallback: Function;
 }
 
 const midiPlayerSlice = createSlice({
@@ -59,6 +60,27 @@ const midiPlayerSlice = createSlice({
 		loadSoundFontComplete: (state) => {
 			state.isLoading = false;
 			state.isLoaded = true;
+
+			// TODO: move to own action just in here for debugging purposes
+			const options = {
+				soundFonts: [
+					"acoustic_grand_piano", 
+					"slap_bass_1"
+				]
+			};
+			const midiChannel = 0;
+			window.MIDI.channels[midiChannel].player.connect(options);
+			setTimeout(() => {
+				window.MIDI.channels[midiChannel].player.noteOn(0, 'C4', 0, 0)
+				window.MIDI.channels[midiChannel].player.noteOn(0, 'E4', 0, 0)
+				window.MIDI.channels[midiChannel].player.noteOn(0, 'G4', 0, 0)
+				window.MIDI.channels[midiChannel].player.noteOn(0, 'B5', 0, 0)
+
+				window.MIDI.channels[midiChannel].player.noteOn(0, 'D4', 0, 2)
+				window.MIDI.channels[midiChannel].player.noteOn(0, 'F4', 0, 2)
+				window.MIDI.channels[midiChannel].player.noteOn(0, 'A4', 0, 2)
+				window.MIDI.channels[midiChannel].player.noteOn(0, 'C5', 0, 2)
+			}, 300);
 		}
 	}
 });

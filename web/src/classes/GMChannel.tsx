@@ -1,3 +1,6 @@
+import { IAudioSupport } from "./GM";
+import GMPlayerWebAudio from "./GMPlayerWebAudio";
+
 /**
  * TODO: Determine where to support delay functionality but it should not be here
  */
@@ -9,8 +12,9 @@ class GMChannel {
 	private _mono: boolean;
 	private _omni: boolean;
 	private _solo: boolean;
+	public player: any;
 
-	constructor (channelId: number) {
+	constructor (channelId: number, audioSupport: IAudioSupport) {
 		this._channelId = channelId;
 		this._instrument = channelId;
 		this._pitchBend = 0;
@@ -18,6 +22,10 @@ class GMChannel {
 		this._mono = false;
 		this._omni = false;
 		this._solo = false;
+
+		if (audioSupport.webAudio) {
+			this.player = new GMPlayerWebAudio(audioSupport);
+		}
 	}
 
 	// #region : Getters and Setters

@@ -12,17 +12,24 @@ const MidiPlayer = () => {
 	const isLoading = useAppSelector((state) => state.midi.isLoading);
 	const dispatch = useAppDispatch();
 	let soundFontCount: number;
-
+	/**
+	 * When page loads create the player on the DOM
+	 */
 	useEffect(() => {
 		if (!isAvailable) {
 			dispatch(setPlayer());
 		}
 	});
-
 	/**
-	 * Load default sound fonts if there is nothing loaded
+	 * Load default sound font(s)
+	 * + player is set and available
+	 * + no other sound font(s) loaded
+	 * + loading sound font(s) not in progress
+	 * 
+	 * TODO: Set format based on canPlayType
 	 */
 	if (isAvailable && !isLoaded && !isLoading) {
+		//const audioSupport = window.MIDI.getAudioSupport();
 		const payload: ISoundFontPayload = {
 			fontFamily: "fat-boy",
 			instrument: ["acoustic_grand_piano", "slap_bass_1"],

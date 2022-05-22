@@ -1,3 +1,12 @@
+
+export interface IOptions {
+	soundFonts: Array<string>;
+}
+/*
+export interface IOptions {
+	[index: string]: IOptionsItem;
+}
+*/
 abstract class GMPlayer {
 
 	constructor() {
@@ -18,7 +27,7 @@ abstract class GMPlayer {
 	abstract chordOn (channelId: number, chord: string, velocity: number, delay: number): void;
 	abstract chordOff (channelId: number, chord: string, delay: number): void;
 	abstract stopAllNotes (): void;
-	abstract connect (opts: Array<string>): void;
+	abstract connect (opts: IOptions): void;
 }
 
 export default GMPlayer;

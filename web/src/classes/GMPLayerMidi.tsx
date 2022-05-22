@@ -1,4 +1,4 @@
-import GMPlayer from "./AbstractGMPlayer"
+import GMPlayer, { IOptions } from "./AbstractGMPlayer"
 
 class GMPlayerMidi extends GMPlayer {
 
@@ -18,7 +18,7 @@ class GMPlayerMidi extends GMPlayer {
 	public chordOn = (channelId: number, chord: string, velocity: number, delay: number): void => { };
 	public chordOff = (channelId: number, chord: string, delay: number): void => { };
 	public stopAllNotes = (): void => { };
-	public connect = (opts: Array<string>): void => { };
+	public connect = (options: IOptions): void => { };
 }
 
 export default GMPlayerMidi;
