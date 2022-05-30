@@ -8,6 +8,13 @@ import * as serviceWorker from "./serviceWorker";
 import App from "./App";
 import theme from "./theme";
 
+declare global {
+	// eslint-disable-next-line @typescript-eslint/naming-convention
+	interface Window {
+		webkitAudioContext: any;
+		MIDI: any;
+	}
+}
 
 ReactDOM.render(
 	<React.StrictMode>

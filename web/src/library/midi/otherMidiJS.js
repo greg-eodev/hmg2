@@ -343,7 +343,7 @@
             return h
         }, t.MIDIjs.getLogging = function() {
             return h
-        }, t.MIDIjs.player_callback = function(e) {}, t.MIDIjs.setPlayerCallback = function(e) {
+        }, t.MIDIjs.player_callback = function(e) {}, t.MIDIjs.setMidiEngineCallback = function(e) {
             t.MIDIjs.player_callback = e
         }, t.MIDIjs.message_callback = function(e) {}, t.MIDIjs.setMessageCallback = function(e) {
             t.MIDIjs.message_callback = e

@@ -1,14 +1,8 @@
 import GMPlayer, { IOptions } from "./AbstractGMPlayer";
 import { IAudioSupport } from "./GM";
+/*
 
-declare global {
-	// eslint-disable-next-line @typescript-eslint/naming-convention
-	interface Window {
-		webkitAudioContext: any;
-		MIDI: any;
-	}
-}
-
+*/
 interface IAudioBuffer {
 	[index: string]: any;
 }
@@ -27,8 +21,8 @@ class GMPlayerWebAudio extends GMPlayer {
 		this.audioBuffers = {};
 		if (this._audioSupport.webAudio) {
 			/**
-			 * support for cross browser compatability - although all browsers support API 
-			 * so it is a legacy fallback just in case
+			 * support for cross browser compatability - although all browsers now support
+			 * the Web Audio API, so it is a legacy fallback just in case
 			 */
 			const AudioContext = window.AudioContext || window.webkitAudioContext;
 			this.context = new AudioContext();
@@ -48,50 +42,66 @@ class GMPlayerWebAudio extends GMPlayer {
 
 	private removePaddingChars = (input: any) => {
 		const lkey = this._keyString.indexOf(input.charAt(input.length - 1));
-		if(lkey === 64){
-			return input.substring(0,input.length - 1);
+		if(lkey === 64) {
+			return input.substring(0, input.length - 1);
 		}
 		return input;
 	}
 
 	private decode = (input: any, arrayBuffer: ArrayBuffer) => {
-		//get last chars to see if are valid
+		/**
+		 * Remove last characters if they are invalid
+		 */
 		input = this.removePaddingChars(input);
 		input = this.removePaddingChars(input);
-
-		const bytes = (input.length / 4) * 3;
+		/**
+		 * It takes 4 characters to generate 3 8-bit numbers (octets)
+		 */
+		const uArraySize = (input.length / 4) * 3;
 		
-		let uarray;
-		let chr1, chr2, chr3;
-		let enc1, enc2, enc3, enc4;
-		let i = 0;
-		let j = 0;
-		
-		if (arrayBuffer)
-			uarray = new Uint8Array(arrayBuffer);
-		else
-			uarray = new Uint8Array(bytes);
-
-		/* eslint-disable-next-line */
-		input = input.replace(/[^A-Za-z0-9\+\/\=]/g, "");
-		
-		for (i=0; i<bytes; i+=3) {	
-			//get the 3 octects in 4 ascii chars
-			enc1 = this._keyString.indexOf(input.charAt(j++));
-			enc2 = this._keyString.indexOf(input.charAt(j++));
-			enc3 = this._keyString.indexOf(input.charAt(j++));
-			enc4 = this._keyString.indexOf(input.charAt(j++));
-
-			chr1 = (enc1 << 2) | (enc2 >> 4);
-			chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);
-			chr3 = ((enc3 & 3) << 6) | enc4;
-
-			uarray[i] = chr1;			
-			if (enc3 !== 64) uarray[i+1] = chr2;
-			if (enc4 !== 64) uarray[i+2] = chr3;
+		let uArray;
+		if (arrayBuffer) {
+			uArray = new Uint8Array(arrayBuffer);
+		} else {
+			uArray = new Uint8Array(uArraySize);
 		}
 
-		return uarray;	
+		/**
+		 * clean up any invalid characters in the input string
+		 */
+		/* eslint-disable-next-line */
+		input = input.replace(/[^A-Za-z0-9\+\/\=]/g, "");
+
+		let octet1, octet2, octet3;
+		let encodedCharacter1, encodedCharacter2, encodedCharacter3, encodedCharacter4;
+		let characterPosition = 0;
+		for (let i = 0; i < uArraySize; i += 3) {	
+			/**
+			 * Get next four characters positions in the keyString
+			 */
+			encodedCharacter1 = this._keyString.indexOf(input.charAt(characterPosition++));
+			encodedCharacter2 = this._keyString.indexOf(input.charAt(characterPosition++));
+			encodedCharacter3 = this._keyString.indexOf(input.charAt(characterPosition++));
+			encodedCharacter4 = this._keyString.indexOf(input.charAt(characterPosition++));
+			/**
+			 * Manipulate the four character positions into 3 8-bit numbers (octets)
+			 */
+			octet1 = (encodedCharacter1 << 2) | (encodedCharacter2 >> 4);
+			octet2 = ((encodedCharacter2 & 15) << 4) | (encodedCharacter3 >> 2);
+			octet3 = ((encodedCharacter3 & 3) << 6) | encodedCharacter4;
+			/**
+			 * Store the octets in the 8-bit unsigned integer array
+			 */
+			uArray[i] = octet1;			
+			if (encodedCharacter3 !== 64) {
+				uArray[i+1] = octet2;
+			}
+			if (encodedCharacter4 !== 64) {
+				uArray[i+2] = octet3;
+			}
+		}
+
+		return uArray;	
 	}
 	/**
 	 * END: Copyright 2011, Daniel Guerrero. All rights reserved.
@@ -108,7 +118,7 @@ class GMPlayerWebAudio extends GMPlayer {
 	public pitchBend = (channelId: number, program: number, delay: number): void => { };
 
 	public noteOn = (instrumentId: number, note: string, velocity: number, delay: number = 0, duration: number = 1.5): void => {
-		
+
 		delay += this.context.currentTime;
 
 		const bufferId = this.generateAudioBufferId(instrumentId, note);
@@ -135,7 +145,7 @@ class GMPlayerWebAudio extends GMPlayer {
 		 */
 		const soundFontsLoadedById: Array<number> = [];
 		options.soundFonts.forEach((key) => {
-			soundFontsLoadedById.push(window.MIDI.getInstrumentIDbyName(key))
+			soundFontsLoadedById.push(MIDI.getInstrumentIDbyName(key))
 		});
 
 		let activeSoundFontBase64;
@@ -152,6 +162,7 @@ class GMPlayerWebAudio extends GMPlayer {
 						(buffer: any) => {
 							buffer.id = bufferId;
 							this.audioBuffers[bufferId] = buffer;
+							if (options.loadCallback) options.loadCallback();
 						}, 
 						(error: Error) => {
 							console.error("Sound Font Decoded Error for Sound ID =", bufferId, error);

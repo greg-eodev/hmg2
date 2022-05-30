@@ -13,74 +13,73 @@ import MidiPlayer from "./components/MidiPlayer";
 import { playSequence, ISequencePayload } from "./slices/midiPlayerSlice";
 import { useAppDispatch } from "./hooks/hooks"
 
-
 const App = () => {
 	const dispatch = useAppDispatch();
 
 	const clickPlaySequence = () => {
-		const piano = window.MIDI.getInstrumentIDbyName('acoustic_grand_piano')
-		const bass = window.MIDI.getInstrumentIDbyName('slap_bass_1')
+		const instrument1 = window.MIDI.getInstrumentIDbyName('tenor_sax')
+		const instrument2 = window.MIDI.getInstrumentIDbyName('french_horn')
 		const payload: ISequencePayload = {
 			channelId: 0,
 			sequence: [
 				{
-					instrumentId: piano,
+					instrumentId: instrument1,
 					note: 'C4',
 					velocity: 0,
 					delay: 2,
 					duration: 1.5,					
 				},
 				{
-					instrumentId: bass,
+					instrumentId: instrument2,
 					note: 'C3',
 					velocity: 0,
 					delay: 2,
 					duration: 3.0,					
 				},
 				{
-					instrumentId: piano,
+					instrumentId: instrument1,
 					note: 'G4',
 					velocity: 0,
 					delay: 4,
 					duration: 2,					
 				},
 				{
-					instrumentId: piano,
+					instrumentId: instrument1,
 					note: 'D4',
 					velocity: 0,
 					delay: 6,
 					duration: 2,					
 				},
 				{
-					instrumentId: piano,
+					instrumentId: instrument1,
 					note: 'A4',
 					velocity: 0,
 					delay: 8,
 					duration: 2,					
 				},
 				{
-					instrumentId: bass,
+					instrumentId: instrument2,
 					note: 'A2',
 					velocity: 0,
 					delay: 8,
 					duration: 3,					
 				},
 				{
-					instrumentId: piano,
+					instrumentId: instrument1,
 					note: 'E4',
 					velocity: 0,
 					delay: 10,
 					duration: 2,					
 				},
 				{
-					instrumentId: piano,
+					instrumentId: instrument1,
 					note: 'B4',
 					velocity: 0,
 					delay: 12,
 					duration: 3,					
 				},
 				{
-					instrumentId: bass,
+					instrumentId: instrument2,
 					note: 'B2',
 					velocity: 0,
 					delay: 12,

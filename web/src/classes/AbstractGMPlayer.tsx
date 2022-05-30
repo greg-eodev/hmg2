@@ -1,6 +1,7 @@
 
 export interface IOptions {
 	soundFonts: Array<string>;
+	loadCallback?: Function;
 }
 /*
 export interface IOptions {
