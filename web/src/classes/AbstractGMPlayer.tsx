@@ -3,17 +3,11 @@ export interface IOptions {
 	soundFonts: Array<string>;
 	loadCallback?: Function;
 }
-/*
-export interface IOptions {
-	[index: string]: IOptionsItem;
-}
-*/
+
 abstract class GMPlayer {
 
-	public active: boolean;
-
+	/* eslint-disable-next-line */
 	constructor() {
-		this.active = true;
 	}
 
 	// TODO: specific for webAudio player => abstract setEffects (list: Array<string>): void;
@@ -25,12 +19,12 @@ abstract class GMPlayer {
 	abstract setVolume (channelId: number, volume: number, delay: number): void;
 	abstract programChange (channelId: number, program: number, delay: number): void;
 	abstract pitchBend (channelId: number, program: number, delay: number): void;
-	abstract noteOn (instrumentId: number, noteId: string, velocity: number, delay: number): void;
-	abstract noteOff (channelId: number, noteId: string, delay: number): void;
+	abstract noteOn (instrumentId: number, note: string, velocity: number, delay: number): void;
+	abstract noteOff (channelId: number, note: string, delay: number): void;
 	abstract chordOn (channelId: number, chord: string, velocity: number, delay: number): void;
 	abstract chordOff (channelId: number, chord: string, delay: number): void;
 	abstract stopAllNotes (): void;
-	abstract connect (opts: IOptions): void;
+	abstract connect (options: IOptions): void;
 }
 
 export default GMPlayer;

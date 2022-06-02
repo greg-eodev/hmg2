@@ -41,17 +41,8 @@ interface INoteToKey {
 	[index: number]: string;
 }
 
-interface IChannelItem {
-	instrument: number;
-	pitchBend: number;
-	mute: boolean;
-	mono: boolean;
-	omni: boolean;
-	solo: boolean;
-}
-
 interface IChannels {
-	[index: number]: IChannelItem;
+	[index: number]: GMChannel;
 }
 
 export interface IAudioSupport {
@@ -145,11 +136,11 @@ class GM {
 	}
 	// #endregion
 
-	clean = (name: string): string => {
+	private clean = (name: string): string => {
 		return name.replace(/[^a-z0-9 ]/gi, "").replace(/[ ]/g, "_").toLowerCase();
 	}
 
-	initMidiInstrumentLists = (): void => {
+	private initMidiInstrumentLists = (): void => {
 		let instrument: string;
 		let instrumentNumber: number;
 		for (let listKey in this._instruments) {
@@ -174,7 +165,7 @@ class GM {
 		}
 	}
 
-	initNoteMapping = (): void => {
+	private initNoteMapping = (): void => {
 		const A0 = 0x15; // first note
 		const C8 = 0x6C; // last note
 		let octave: number;
@@ -188,19 +179,21 @@ class GM {
 		}		
 	}
 
-	initChannels = (): void => {
+	private initChannels = (): void => {
 		for (let channelId = 0; channelId < this._numberOfChannels; channelId++) {
 			this._channels[channelId] = new GMChannel(channelId, this._audioSupport);
 		}
 	}
 
-	addChannel = (channelId: number): void => {
+	addChannel = (channelId: number): boolean => {
 		if (!this._channels[channelId]) {
 			this._channels[channelId] = new GMChannel(channelId, this._audioSupport);
+			return true;
 		}
+		return false;
 	}
 
-	detectAudioSupport = (): void => {
+	private detectAudioSupport = (): void => {
 		/**
 		 * Detect if Web Audio API is natively supported
 		 * + this will be our primary support for audio playback in web browsers
@@ -239,7 +232,7 @@ class GM {
 		return this._audioSupport;
 	}
 
-	getInstrumentIDbyName = (instrumentName: string): number => {
+	getInstrumentIdByName = (instrumentName: string): number => {
 		return this._byName[instrumentName].number
 	}
 }

@@ -17,8 +17,8 @@ const App = () => {
 	const dispatch = useAppDispatch();
 
 	const clickPlaySequence = () => {
-		const instrument1 = window.MIDI.getInstrumentIDbyName('tenor_sax')
-		const instrument2 = window.MIDI.getInstrumentIDbyName('french_horn')
+		const instrument1 = window.MIDI.getInstrumentIdByName('tenor_sax')
+		const instrument2 = window.MIDI.getInstrumentIdByName('french_horn')
 		const payload: ISequencePayload = {
 			channelId: 0,
 			sequence: [

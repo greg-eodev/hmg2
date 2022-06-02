@@ -1,8 +1,8 @@
 import GMPlayer, { IOptions } from "./AbstractGMPlayer";
 import { IAudioSupport } from "./GM";
-/*
-
-*/
+/**
+ *
+ */
 interface IAudioBuffer {
 	[index: string]: any;
 }
@@ -145,7 +145,7 @@ class GMPlayerWebAudio extends GMPlayer {
 		 */
 		const soundFontsLoadedById: Array<number> = [];
 		options.soundFonts.forEach((key) => {
-			soundFontsLoadedById.push(MIDI.getInstrumentIDbyName(key))
+			soundFontsLoadedById.push(MIDI.getInstrumentIdByName(key))
 		});
 
 		let activeSoundFontBase64;

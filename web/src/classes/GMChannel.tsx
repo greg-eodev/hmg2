@@ -1,4 +1,5 @@
 import { IAudioSupport } from "./GM";
+import GMPlayer from "./AbstractGMPlayer";
 import GMPlayerWebAudio from "./GMPlayerWebAudio";
 
 /**
@@ -12,7 +13,7 @@ class GMChannel {
 	private _mono: boolean;
 	private _omni: boolean;
 	private _solo: boolean;
-	public player: any;
+	public player: GMPlayer;
 
 	constructor (channelId: number, audioSupport: IAudioSupport) {
 		this._channelId = channelId;
@@ -22,23 +23,27 @@ class GMChannel {
 		this._mono = false;
 		this._omni = false;
 		this._solo = false;
-
+		/**
+		* TODO: this will determine the hierarchary for which audio library to use
+		*/
 		if (audioSupport.webAudio) {
 			this.player = new GMPlayerWebAudio(audioSupport);
+		} else {
+			this.player = Object.create(null);
 		}
 	}
 
 	// #region : Getters and Setters
-	public get channelId () {
+	public get channelId (): number {
 		return this._channelId;
 	}
 
-	public get instrument () {
+	public get instrument (): number {
 		return this._instrument;
 	}
 
-	public set instrument (programId: number) {
-		this._instrument = programId;
+	public set instrument (instrumentId: number) {
+		this._instrument = instrumentId;
 	}
 
 	public get pitchBend () {
