@@ -1,7 +1,12 @@
 import GMPlayer, { IOptions } from "./AbstractGMPlayer";
 import { IAudioSupport } from "./GM";
 /**
- *
+ * #### StepTunes General MIDI Web Audio Player
+ * 
+ * TODO: specific for webAudio player => abstract setEffects (list: Array<string>): void;
+ * TODO: specific for webAudio player => abstract getContext (): void; 
+ * TODO: getContext() should return context it seems
+ * TODO: specific for webAudio player => abstract setContext (newCtx: number, onload: Function, onprogress: Function, onerror: Function): void;
  */
 interface IAudioBuffer {
 	[index: string]: any;
@@ -31,6 +36,9 @@ class GMPlayerWebAudio extends GMPlayer {
 
 	/**
 	 * Copyright 2011, Daniel Guerrero. All rights reserved.
+	 * ************************************************************************************************
+	 * 
+	 * #### Decode the Array Buffer
 	 */
 	public decodeArrayBuffer = (input: any): ArrayBuffer => {
 		const bytes = (input.length / 4) * 3;
@@ -118,7 +126,6 @@ class GMPlayerWebAudio extends GMPlayer {
 	public pitchBend = (channelId: number, program: number, delay: number): void => { };
 
 	public noteOn = (instrumentId: number, note: string, velocity: number, delay: number = 0, duration: number = 1.5): void => {
-
 		delay += this.context.currentTime;
 
 		const bufferId = this.generateAudioBufferId(instrumentId, note);

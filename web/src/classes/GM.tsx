@@ -185,7 +185,7 @@ class GM {
 		}
 	}
 
-	addChannel = (channelId: number): boolean => {
+	public addChannel = (channelId: number): boolean => {
 		if (!this._channels[channelId]) {
 			this._channels[channelId] = new GMChannel(channelId, this._audioSupport);
 			return true;

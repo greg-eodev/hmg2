@@ -19,7 +19,7 @@ const MidiPlayer = () => {
 	 */
 	useEffect(() => {
 		if (!isAvailable) {
-			dispatch(setMidiEngine());
+			dispatch(setMidiEngine({ numberOfChannels: 1 }));
 		}
 	});
 	/**

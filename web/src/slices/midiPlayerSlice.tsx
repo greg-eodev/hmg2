@@ -1,22 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 import GM from "../classes/GM";
 
-const MAX_CHANNELS = 16;
-
-export interface Ichannels {
-	areAudioBuffersLoading: boolean;
-	areAudioBuffersLoaded: boolean;
-	isPlaying: boolean;
-}
-
-export interface IPlayerState {
-	baseUrl: string;
-	isLoaded: boolean;
-	isLoading: boolean;
-	isAvailable: boolean;
-	isPlaying: boolean;
-	channels: Array<Ichannels>;
-}
+const MAX_CHANNELS = 16;  // !! move to Parameter Store in AWS System Manager
 
 export type SoundFormat = "mp3" | "ogg";
 export interface ISoundFontPayload {
@@ -46,8 +31,27 @@ export interface ISequencePayload {
 	sequence: Array<ISoundItem>
 }
 
-const initchannels = (): Array<Ichannels> => {
-	const channels: Array<Ichannels> = [];
+export interface IChannels {
+	areAudioBuffersLoading: boolean;
+	areAudioBuffersLoaded: boolean;
+	isPlaying: boolean;
+}
+
+export interface IPlayerState {
+	baseUrl: string;
+	isLoaded: boolean;
+	isLoading: boolean;
+	isAvailable: boolean;
+	isPlaying: boolean;
+	channels: Array<IChannels>;
+}
+/**
+ * #### Create the Channel States
+ *
+ * @returns {*} 
+ */
+const initchannels = (): Array<IChannels> => {
+	const channels: Array<IChannels> = [];
 	for (let i = 0; i < MAX_CHANNELS; i++) {
 		channels.push({
 			areAudioBuffersLoading: false,
@@ -74,7 +78,7 @@ const midiPlayerSlice = createSlice({
 		/**
 		 * #### Set MIDI Engine
 		 * 
-		 * Create the General MIDI Engine and attach to the DOM
+		 * Create the General MIDI Engine and attach to the DOM.
 		 * 
 		 * !! We are adding the MIDI object to the browser window because of the way
 		 * !! the current sound fonts and MidiJS were structured.
@@ -84,14 +88,11 @@ const midiPlayerSlice = createSlice({
 		 * TODO: desire for state to only have serializable data, this may be a 
 		 * TODO: good solution for the general midi object - as it's not really a state 
 		 * TODO: item anyways
+		 * 
+		 * TODO: Should we support channel states and player state with their own slices?
 		 */ 
-		setMidiEngine: (state) => {
-			/**
-
-			 * 
-			 */
-			const numberOfChannels = 1;
-			window.MIDI = new GM(numberOfChannels);
+		setMidiEngine: (state, action) => {
+			window.MIDI = new GM(action.payload.numberOfChannels);
 			state.isAvailable = true;
 		},
 		/** 
@@ -125,7 +126,7 @@ const midiPlayerSlice = createSlice({
 		/** 
 		 * #### Load Sound Fonts Complete
 		 * 
-		 * Updates the loading and loaded state
+		 * Updates the loading and loaded states.
 		 */
 		loadSoundFontComplete: (state) => {
 			state.isLoading = false;
@@ -134,27 +135,50 @@ const midiPlayerSlice = createSlice({
 		/** 
 		 * #### Activate the Specified Channel
 		 * 
-		 * Updates the loading and loaded state
+		 * Determine if the channel exists, if not add it. Verify that is was successfully added or already existed
+		 * and connect to the channel, transcode and load the specified soundfonts into the audio context buffers for playback.
 		 */
 		channelActivate: (state, action) => {
-			const options = {
-				soundFonts: action.payload.soundFonts,
-				loadCallback: action.payload.loadCallback
-			};
-			window.MIDI.channels[action.payload.channelId].player.connect(options);
-			state.channels[action.payload.channelId].areAudioBuffersLoading = true;
+			/** 
+			 * need to create the channel?
+			 */
+			if (!window.MIDI.channels[action.payload.channelId]) {
+				window.MIDI.addChannel(action.payload.channelId);
+			}
+			/** 
+			 * channel exist?
+			 */
+			if (window.MIDI.channels[action.payload.channelId]) {
+				window.MIDI.channels[action.payload.channelId].player.connect({
+					soundFonts: action.payload.soundFonts,
+					loadCallback: action.payload.loadCallback
+				});
+
+				state.channels[action.payload.channelId].areAudioBuffersLoading = true;
+			} else {
+				console.error("GM.channelActivate: Channel Does Not Exist.  Channel = " + action.payload.channelId);
+			}
 		},
+		/** 
+		 * #### Channel Activation Complete
+		 * 
+		 * Updates the audioBuffers loading and loaded states.
+		 */
 		channelActivationComplete: (state, action) => {
-			// TODO: support channel state - channel states, player states with slices
 			state.channels[action.payload.channelId].areAudioBuffersLoaded = true;
 			state.channels[action.payload.channelId].areAudioBuffersLoading = false;
 		},
+		/** 
+		 * #### Play a MIDI sequence
+		 * 
+		 * TODO: implement isPlaying, clearSequence, etc
+		 */
 		playSequence: (state, action) => {
+			/** 
+			 * Make sure the soundFonts and Audio Buffers we properly loaded
+			 */
 			if (state.isLoaded && state.channels[action.payload.channelId].areAudioBuffersLoaded) {
-				//
-				// TODO: implement isPlaying, clearSequence, etc
-				//
-				action.payload.sequence.forEach((soundItem: any) => {
+				action.payload.sequence.forEach((soundItem: ISoundItem) => {
 					window.MIDI.channels[action.payload.channelId].player.noteOn(
 						soundItem.instrumentId, 
 						soundItem.note, 
