@@ -1,5 +1,7 @@
-import { createSlice } from "@reduxjs/toolkit";
+//import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import GM from "../classes/GM";
+import { INoteOptions } from "../classes/AbstractGMPlayer";
 
 const MAX_CHANNELS = 16;  // !! move to Parameter Store in AWS System Manager
 
@@ -18,17 +20,9 @@ export interface IChannelActivatePayload {
 	loadCallback: Function;
 }
 
-export interface ISoundItem {
-	instrumentId: number;
-	note: string;
-	velocity: number;
-	delay: number;
-	duration: number;
-}
-
 export interface ISequencePayload {
 	channelId: number,
-	sequence: Array<ISoundItem>
+	sequence: Array<INoteOptions>
 }
 
 export interface IChannels {
@@ -41,6 +35,7 @@ export interface IPlayerState {
 	baseUrl: string;
 	isLoaded: boolean;
 	isLoading: boolean;
+	loadingCount: number;
 	isAvailable: boolean;
 	isPlaying: boolean;
 	channels: Array<IChannels>;
@@ -66,10 +61,52 @@ const initialState: IPlayerState = {
 	baseUrl: "https://sounds.steptunes.com",
 	isLoaded: false,
 	isLoading: false,
+	loadingCount: 0,
 	isAvailable: false,
 	isPlaying: false,
 	channels: initchannels()
 }
+
+/** 
+ * #### Asynchronously Load Sound Fonts
+ * 
+ * Attach a variable number Sound Font scripts to the DOM and let them install themselves into the MIDI global
+ * object. SoundFonts can be used by any channel and hence are global within the General MIDI engine.  However, they are
+ * not loaded in the audio.context for each channel - that is a separate action as each channel may not 
+ * require the use of every sound font globally available.
+ * 
+ * TODO: Add typing for async see: https://redux-toolkit.js.org/api/createAsyncThunk
+ *
+ * @param instrumentSourceUrl			the full URL of the Sound Font
+ */
+ export const asyncLoadSoundFont = createAsyncThunk(
+	"midi/asyncLoadSoundFont", 
+	async (instrumentSourceUrl: string) => {
+		return new Promise<any>((resolve, reject) => {
+			/**
+			 * attach the sound font script element to the DOM
+			 */
+			let loadSound: HTMLScriptElement = document.createElement("script");
+			loadSound.type = "text/javascript";
+			loadSound.src = instrumentSourceUrl;
+			document.body.appendChild(loadSound);
+			/**
+			 * resolve promise if loading of script element succeeds
+			 */
+			loadSound.onload = (event: any) => {
+				console.log("asyncLoadSoundFont:", instrumentSourceUrl, event);
+				resolve(instrumentSourceUrl);
+			}
+			/**
+			 * reject promise if loading of script element fails
+			 */
+			loadSound.onerror = (event: any) => {
+				console.error("asyncLoadSoundFont:", instrumentSourceUrl, event);
+				reject(instrumentSourceUrl);
+			}
+		});
+	}
+);
 
 const midiPlayerSlice = createSlice({
 	name: "midi",
@@ -91,47 +128,12 @@ const midiPlayerSlice = createSlice({
 		 * 
 		 * TODO: Should we support channel states and player state with their own slices?
 		 */ 
+		//setMidiEngine: (state: IPlayerState, action: PayloadAction<ISequencePayload>) => {
 		setMidiEngine: (state, action) => {
 			window.MIDI = new GM(action.payload.numberOfChannels);
 			state.isAvailable = true;
 		},
-		/** 
-		 * #### Load Sound Fonts
-		 * 
-		 * Attach a variable number Sound Font scripts to the DOM and let them install themselves into the MIDI global
-		 * object. SoundFonts can be used by any channel and hence are global within the General MIDI engine.  However, they are
-		 * not loaded in the audio.context for each channel - that is a separate action as each channel may not 
-		 * require the use of every sound font globally available.
-		 * 
-		 * Attach a callback to the **element.onLoad** event to track the loading completion of each of the scripts which should
-		 * dispatch the **loadSoundFontComplete** action when all soundFonts have been loaded.
-		 */
-		loadSoundFont: (state, action) => {
-			const compressionExtension: string = action.payload.compressed ? ".gz" : "";
-			let loadSound: HTMLScriptElement;
-			/** 
-			 * are there any sound fonts to load?  If so, set the isLoading state and load them
-			 */
-			if (action.payload.instrument.length > 0) {
-				state.isLoading = true;
-				action.payload.instrument.forEach((instrument: string) => {
-					loadSound = document.createElement("script");
-					loadSound.type = "text/javascript";
-					loadSound.src = `${state.baseUrl}/${action.payload.fontFamily}/${instrument}-${action.payload.format}.js${compressionExtension}`;
-					document.body.appendChild(loadSound);
-					loadSound.onload = () => { action.payload.loadCallback(); }
-				});
-			}
-		},
-		/** 
-		 * #### Load Sound Fonts Complete
-		 * 
-		 * Updates the loading and loaded states.
-		 */
-		loadSoundFontComplete: (state) => {
-			state.isLoading = false;
-			state.isLoaded = true;
-		},
+
 		/** 
 		 * #### Activate the Specified Channel
 		 * 
@@ -159,6 +161,7 @@ const midiPlayerSlice = createSlice({
 				console.error("GM.channelActivate: Channel Does Not Exist.  Channel = " + action.payload.channelId);
 			}
 		},
+
 		/** 
 		 * #### Channel Activation Complete
 		 * 
@@ -168,6 +171,7 @@ const midiPlayerSlice = createSlice({
 			state.channels[action.payload.channelId].areAudioBuffersLoaded = true;
 			state.channels[action.payload.channelId].areAudioBuffersLoading = false;
 		},
+
 		/** 
 		 * #### Play a MIDI sequence
 		 * 
@@ -175,27 +179,42 @@ const midiPlayerSlice = createSlice({
 		 */
 		playSequence: (state, action) => {
 			/** 
-			 * Make sure the soundFonts and Audio Buffers we properly loaded
+			 * Make sure the soundFonts and Audio Buffers were properly loaded
 			 */
 			if (state.isLoaded && state.channels[action.payload.channelId].areAudioBuffersLoaded) {
-				action.payload.sequence.forEach((soundItem: ISoundItem) => {
-					window.MIDI.channels[action.payload.channelId].player.noteOn(
-						soundItem.instrumentId, 
-						soundItem.note, 
-						soundItem.velocity,
-						soundItem.delay,
-						soundItem.duration,
-					);
+				let isPlaying = false;
+				action.payload.sequence.forEach((soundItem: INoteOptions ) => {
+					window.MIDI.channels[action.payload.channelId].player.noteOn(soundItem);
+					isPlaying = true;
 				});
+				state.isPlaying = isPlaying;
 			}
 		}
+	},
+	extraReducers: (builder) => {
+		builder.addCase(asyncLoadSoundFont.pending, (state) => {
+			state.isLoading = true;
+			state.loadingCount += 1;
+		});
+
+		builder.addCase(asyncLoadSoundFont.fulfilled, (state, action) => {
+			state.loadingCount -= 1;
+			console.log("asyncLoadSoundFont.fulfilled: Action:", action);
+			if (state.loadingCount <= 0) {
+				state.isLoading = false;
+				state.isLoaded = true;
+			}
+		});
+
+		builder.addCase(asyncLoadSoundFont.rejected, (state) => {
+			state.isLoading = false;
+			state.isLoaded = false;
+		});
 	}
 });
 
 export const {
 	setMidiEngine,
-	loadSoundFont,
-	loadSoundFontComplete,
 	playSequence,
 	channelActivate,
 	channelActivationComplete

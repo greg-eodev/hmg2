@@ -1,16 +1,25 @@
 /**
- * #### MidiTS - Modern Midi for the Modern Browser
+ * # StepTunes Impresario  
+ * ### Modern Midi for the Modern Browser  
+ * + Targeting the General MIDI implementation of MIDI 1.0
  * + Built with Typescript
+ * + Built for React/Redux  
  * 
- * Derived from the hardwork of others and the MidiJS library (https://galactic.ink/midi-js/) and
- * https://github.com/mudcube/MIDI.js/ - thanks MudCube!
+ * **We are inspired by the vision of those that came before**
+ * - - -
+ * **Thanks** to Ikutaro Kakehashi (Roland), Dave Smith (Sequental Circuits), and Chet Wood (Sequental Circuits) 
+ * for Musical Instrument Digital Interface (MIDI) @ https://www.midi.org/  
  * 
- * TODO: make t.ds file for GM
+ * **Thanks** to MudCube for the MidiJS library @ https://galactic.ink/midi-js/ | https://github.com/mudcube/MIDI.js/  
+ * 
+ * TODO: LICENSE HERE
+ * 
+ * 2022 Copyright Trainwreck of Sound, LLC  
  */
 import GMChannel from "./GMChannel";
 
 interface IMidiInstrument {
-	id: string;
+	name: string;
 	instrument: string;
 	number: number;
 	category: string;
@@ -52,7 +61,31 @@ export interface IAudioSupport {
 	vorbis: string;
 	mpeg: string;
 }
-
+/**
+ * #### StepTunes General Midi  
+ * 
+ * GM: {
+ * 		byID: Instrument objects organized by the instrument number, for example, 0 => acoustic_grand_piano
+ * 		byName: Instrument objects organized by the name, for example, "acoustic_grand_piano"
+ * 		byCategory: Instrument objects organized by the category, for example, "piano"
+ * 		keyToNote: Map Key (Ab3) to GM Note # (56)
+ * 		noteToKey: GM Note # (56) to Map Key (Ab3)
+ * 		channels: Up to 16 MIDI channels (GMChannel)
+ * 			player: Player instance and context for each channel [currently: Web Audio (GMPlayerWebAudio)]
+ * 		instruments: Source instrument table - each General MIDI instrument by category
+ * 		audioSupport: {
+ * 			webAudio: is Web Audi API supported in this browser?
+ * 			webMidi: is Web MIDI API supported in this browser?
+ * 			audioTag: is <audio> supported in this browser?
+ * 			mp3: browser supports MP3 encoded playback: "probably", "maybe", "" (see: https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/canPlayType)
+ * 			ogg: browser supports OGG encoded playback: "probably", "maybe", "" (see: https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/canPlayType)
+ * 		}
+ * 		numberOfChannels: current number of channels installed
+ * }
+ * 
+ * TODO: make t.ds file for GM
+ * TODO: implement Web MIDI Player
+ */
 class GM {
 	private _byId: IMidiById;
 	private _byName: IMidiByName;
@@ -64,7 +97,7 @@ class GM {
 	private _audioSupport: IAudioSupport;
 	private _numberOfChannels: number;
 
-	constructor (numberOfChannels = 1) {
+	constructor (numberOfChannels: number = 1) {
 		const MAX_CHANNELS = 16;
 		this._numberOfChannels = numberOfChannels <= 0 ? 1 : numberOfChannels;
 		this._numberOfChannels = this._numberOfChannels > MAX_CHANNELS ? MAX_CHANNELS : this._numberOfChannels;
@@ -110,7 +143,7 @@ class GM {
 		this.initChannels();
 	}
 
-	// #region : Getters and Setters
+	// #region : Getters
 	public get byId (): IMidiById {
 		return this._byId
 	}
@@ -134,65 +167,125 @@ class GM {
 	public get channels (): IChannels {
 		return this._channels
 	}
+
+	
+	public get audioSupport (): IAudioSupport {
+		return this._audioSupport;
+	}
 	// #endregion
 
-	private clean = (name: string): string => {
+	/**
+	 * #### Make a consistent Machine Readable Name
+	 * + remove all non-alpha characters - except spaces
+	 * + convert spaces to underscores
+	 * + force lowercase
+	 * 
+	 * example:
+	 * Acoustic Grand Piano
+	 * acoustic_grand_piano
+	 *
+	 * @private
+	 * @param name 				the GM instrument Name
+	 */
+	private instrumentMachineName = (name: string): string => {
 		return name.replace(/[^a-z0-9 ]/gi, "").replace(/[ ]/g, "_").toLowerCase();
 	}
 
+	/**
+	 * #### Build all Instrument Related Lists
+	 * 
+	 * Process all of the General Midi instruments from the source list and create the
+	 * functional instrument lists
+	 * + byID
+	 * + byName
+	 * + byCategory
+	 *
+	 * @private
+	 */
 	private initMidiInstrumentLists = (): void => {
-		let instrument: string;
 		let instrumentNumber: number;
-		for (let listKey in this._instruments) {
-			let list: InstrumentList = this._instruments[listKey];
-			for (let listEntry = 0; listEntry < list.length; listEntry++) {
-				instrument = list[listEntry];
-				if (!instrument) continue;
+		let instrumentCategoryName: string;
+		let instrumentName: string;
+		Object.keys(this._instruments).forEach((instrumentListKey: string) => {
+			let instrumentList: InstrumentList = this._instruments[instrumentListKey];
+			instrumentList.forEach((instrument: string) => {
+				/**
+				 * pull the instrument number from the source instrument string
+				 */
 				instrumentNumber = parseInt(instrument.substr(0, instrument.indexOf(" ")), 10);
 				instrument = instrument.replace(instrumentNumber + " ", "");
-				if (!this._byCategory[this.clean(listKey)]) {
-                    this._byCategory[this.clean(listKey)] = {};
+				/**
+				 * convert category and instrument into machine readable names
+				 */
+				instrumentCategoryName = this.instrumentMachineName(instrumentListKey);
+				instrumentName = this.instrumentMachineName(instrument);
+				/**
+				 * create category if doesn't exist
+				 */
+				if (!this._byCategory[instrumentCategoryName]) {
+                    this._byCategory[instrumentCategoryName] = {};
                 }
+				/**
+				 * add instrument entry to all three lists: byId, byName, byCategory
+				 */
 				this._byId[--instrumentNumber] = 
-				this._byName[this.clean(instrument)] = 
-				this._byCategory[this.clean(listKey)][this.clean(instrument)] = {
-					id: this.clean(instrument),
+				this._byName[instrumentName] = 
+				this._byCategory[instrumentCategoryName][instrumentName] = {
+					name: instrumentName,
 					instrument: instrument,
 					number: instrumentNumber,
-					category: listKey
+					category: instrumentListKey
 				};
-			}
-		}
+			})
+		})
 	}
 
+	/**
+	 * #### Build Note Mappings  
+	 * 
+	 * Build mappings
+	 * + from (note+octave) => midi number
+	 * + from midi number => note+octave
+	 * 
+	 * Include all 128 Midi note numbers 0 -> 127 (C-1 (sub-base) -> G9) that are defined in the MIDI specification, 
+	 * although typical sound fonts only support 88 (piano keyboard) 21 -> 108 (A0 -> C8).  
+	 * 
+	 * @private
+	 */
 	private initNoteMapping = (): void => {
-		const A0 = 0x15; // first note
-		const C8 = 0x6C; // last note
 		let octave: number;
 		let name: string;
 		const number2key = ["C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"];
-		for (var note = A0; note <= C8; note++) {
-			octave = (note - 12) / 12 >> 0;
-			name = number2key[note % 12] + octave;
+		for (let note = 0; note <= 127; note++) {
+			octave = (note - 12) / 12 < 0 ? -1 : Math.trunc((note - 12) / 12);
+			name = number2key[Math.abs(note) % 12] + octave;
 			this._keyToNote[name] = note;
 			this._noteToKey[note] = name;
 		}		
 	}
 
+	/**
+	 * #### Initialize the Channels
+	 * 
+	 * Create the number of channel objects based on the _numberOfChannels property
+	 * 
+	 * @private
+	 */
 	private initChannels = (): void => {
 		for (let channelId = 0; channelId < this._numberOfChannels; channelId++) {
 			this._channels[channelId] = new GMChannel(channelId, this._audioSupport);
 		}
 	}
 
-	public addChannel = (channelId: number): boolean => {
-		if (!this._channels[channelId]) {
-			this._channels[channelId] = new GMChannel(channelId, this._audioSupport);
-			return true;
-		}
-		return false;
-	}
-
+	/**
+	 * #### Detect the Audio APIs supported by Current Browser
+	 * + check for Web Audio API
+	 * + check for Web MIDI API
+	 * + confirm <audio> tag support
+	 *     + determine if OGG and MP3 are supported
+	 *
+	 * @private
+	 */
 	private detectAudioSupport = (): void => {
 		/**
 		 * Detect if Web Audio API is natively supported
@@ -228,11 +321,32 @@ class GM {
 		}
 	}
 
-	getAudioSupport = (): IAudioSupport => {
-		return this._audioSupport;
+	/**
+	 * #### Add a Channel object
+	 * 
+	 * Given the channelID, see if it already exists, if not add it to the GM object
+	 *
+	 * @param channelId  		the channel to add
+	 * @returns  				true if channel was added, flase if channel already exists
+	 */
+	public addChannel = (channelId: number): boolean => {
+		if (!this._channels[channelId]) {
+			this._channels[channelId] = new GMChannel(channelId, this._audioSupport);
+			this._numberOfChannels++;
+			return true;
+		}
+		return false;
 	}
 
-	getInstrumentIdByName = (instrumentName: string): number => {
+	/**
+	 * #### Get Instrument ID
+	 * 
+	 * Given the instrument name, for example acoustic_grand_piano, return the ID 
+	 *
+	 * @param instrumentName  		machine readable name
+	 * @returns  					the ID or undefined
+	 */
+	public getInstrumentIdByName = (instrumentName: string): number => {
 		return this._byName[instrumentName].number
 	}
 }

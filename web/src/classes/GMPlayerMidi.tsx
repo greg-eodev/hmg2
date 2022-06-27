@@ -1,4 +1,4 @@
-import GMPlayer, { IOptions } from "./AbstractGMPlayer"
+import GMPlayer, { IOptions, INoteOptions } from "./AbstractGMPlayer"
 
 class GMPlayerMidi extends GMPlayer {
 
@@ -13,7 +13,7 @@ class GMPlayerMidi extends GMPlayer {
 	public setVolume = (channelId: number, volume: number, delay: number): void => { };
 	public programChange = (channelId: number, program: number, delay: number): void => { };
 	public pitchBend = (channelId: number, program: number, delay: number): void => { };
-	public noteOn = (channelId: number, noteId: string, velocity: number, delay: number): void => { };
+	public noteOn = (options: INoteOptions): void => { };
 	public noteOff = (channelId: number, noteId: string, delay: number): void => { };
 	public chordOn = (channelId: number, chord: string, velocity: number, delay: number): void => { };
 	public chordOff = (channelId: number, chord: string, delay: number): void => { };

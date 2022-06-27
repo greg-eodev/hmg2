@@ -3,6 +3,7 @@ import { logger } from "redux-logger";
 import mainDrawerSlice from "../slices/mainDrawerSlice";
 import drawSlice from "../slices/drawSlice";
 import midiPlayerSlice from "../slices/midiPlayerSlice";
+//import thunkMiddleware from "redux-thunk";
 
 export const store = configureStore({
 	reducer: {

@@ -27,7 +27,9 @@ const App = () => {
 					note: 'C4',
 					velocity: 0,
 					delay: 0,
-					duration: 1.5,					
+					duration: 1.5,
+					shouldFade: false,
+					fadeDuration: 0					
 				},
 				{
 					instrumentId: instrument2,
@@ -35,6 +37,8 @@ const App = () => {
 					velocity: 0,
 					delay: 0,
 					duration: 1,					
+					shouldFade: false,
+					fadeDuration: 0					
 				},
 				{
 					instrumentId: instrument1,
@@ -42,6 +46,8 @@ const App = () => {
 					velocity: 0,
 					delay: 1,
 					duration: 1,					
+					shouldFade: false,
+					fadeDuration: 0					
 				},
 				{
 					instrumentId: instrument1,
@@ -49,6 +55,8 @@ const App = () => {
 					velocity: 0,
 					delay: 2,
 					duration: 1,					
+					shouldFade: false,
+					fadeDuration: 0					
 				},
 				{
 					instrumentId: instrument1,
@@ -56,6 +64,8 @@ const App = () => {
 					velocity: 0,
 					delay: 3,
 					duration: 1,					
+					shouldFade: false,
+					fadeDuration: 0					
 				},
 				{
 					instrumentId: instrument2,
@@ -63,6 +73,8 @@ const App = () => {
 					velocity: 0,
 					delay: 3,
 					duration: 1.5,					
+					shouldFade: false,
+					fadeDuration: 0					
 				},
 				{
 					instrumentId: instrument1,
@@ -70,6 +82,8 @@ const App = () => {
 					velocity: 0,
 					delay: 4,
 					duration: 1,					
+					shouldFade: false,
+					fadeDuration: 0					
 				},
 				{
 					instrumentId: instrument1,
@@ -77,6 +91,8 @@ const App = () => {
 					velocity: 0,
 					delay: 5,
 					duration: 1.5,					
+					shouldFade: false,
+					fadeDuration: 0					
 				},
 				{
 					instrumentId: instrument1,
@@ -84,6 +100,8 @@ const App = () => {
 					velocity: 0,
 					delay: 6,
 					duration: 1,					
+					shouldFade: false,
+					fadeDuration: 0					
 				},
 				{
 					instrumentId: instrument1,
@@ -91,6 +109,8 @@ const App = () => {
 					velocity: 0,
 					delay: 7,
 					duration: 1,					
+					shouldFade: false,
+					fadeDuration: 0					
 				},
 				{
 					instrumentId: instrument2,
@@ -98,6 +118,8 @@ const App = () => {
 					velocity: 0,
 					delay: 7,
 					duration: 1.5,					
+					shouldFade: false,
+					fadeDuration: 0					
 				},
 				{
 					instrumentId: instrument1,
@@ -105,6 +127,8 @@ const App = () => {
 					velocity: 0,
 					delay: 8,
 					duration: 1,					
+					shouldFade: false,
+					fadeDuration: 0					
 				},
 				{
 					instrumentId: instrument1,
@@ -112,6 +136,8 @@ const App = () => {
 					velocity: 0,
 					delay: 9,
 					duration: 1,					
+					shouldFade: false,
+					fadeDuration: 0					
 				},
 				{
 					instrumentId: instrument1,
@@ -119,6 +145,8 @@ const App = () => {
 					velocity: 0,
 					delay: 10,
 					duration: 1,					
+					shouldFade: false,
+					fadeDuration: 0					
 				},
 				{
 					instrumentId: instrument2,
@@ -126,6 +154,8 @@ const App = () => {
 					velocity: 0,
 					delay: 10,
 					duration: 1.5,					
+					shouldFade: false,
+					fadeDuration: 0					
 				},
 				{
 					instrumentId: instrument1,
@@ -133,6 +163,8 @@ const App = () => {
 					velocity: 0,
 					delay: 11,
 					duration: 1,					
+					shouldFade: false,
+					fadeDuration: 0					
 				},
 				{
 					instrumentId: instrument1,
@@ -140,6 +172,8 @@ const App = () => {
 					velocity: 0,
 					delay: 12,
 					duration: 1,					
+					shouldFade: false,
+					fadeDuration: 0					
 				},
 				{
 					instrumentId: instrument2,
@@ -147,6 +181,8 @@ const App = () => {
 					velocity: 0,
 					delay: 12,
 					duration: 1.5,					
+					shouldFade: false,
+					fadeDuration: 0					
 				},
 				{
 					instrumentId: instrument1,
@@ -154,6 +190,8 @@ const App = () => {
 					velocity: 0,
 					delay: 13.5,
 					duration: 0.25,					
+					shouldFade: false,
+					fadeDuration: 0					
 				},
 				{
 					instrumentId: instrument1,
@@ -161,6 +199,8 @@ const App = () => {
 					velocity: 0,
 					delay: 13.5,
 					duration: 0.25,					
+					shouldFade: false,
+					fadeDuration: 0					
 				},
 				{
 					instrumentId: instrument1,
@@ -168,6 +208,8 @@ const App = () => {
 					velocity: 0,
 					delay: 13.5,
 					duration: 0.25,					
+					shouldFade: false,
+					fadeDuration: 0					
 				},
 				{
 					instrumentId: instrument1,
@@ -175,6 +217,8 @@ const App = () => {
 					velocity: 0,
 					delay: 13.5,
 					duration: 0.25,					
+					shouldFade: false,
+					fadeDuration: 0					
 				},
 				{
 					instrumentId: instrument1,
@@ -182,6 +226,8 @@ const App = () => {
 					velocity: 0,
 					delay: 13.75,
 					duration: 3,					
+					shouldFade: true,
+					fadeDuration: 0.5					
 				},
 				{
 					instrumentId: instrument1,
@@ -189,6 +235,8 @@ const App = () => {
 					velocity: 0,
 					delay: 13.75,
 					duration: 3,					
+					shouldFade: true,
+					fadeDuration: 0.5					
 				},
 				{
 					instrumentId: instrument1,
@@ -196,6 +244,8 @@ const App = () => {
 					velocity: 0,
 					delay: 13.75,
 					duration: 3,					
+					shouldFade: true,
+					fadeDuration: 0.5					
 				},
 				{
 					instrumentId: instrument1,
@@ -203,9 +253,10 @@ const App = () => {
 					velocity: 0,
 					delay: 13.75,
 					duration: 3,					
+					shouldFade: true,
+					fadeDuration: 0.5					
 				}
 			]
-			
 		}
 
 		dispatch(playSequence(payload));
@@ -217,9 +268,6 @@ const App = () => {
 				<Typography variant="h4" component="h1" gutterBottom>
 					StepTunes
 				</Typography>				
-				<Typography variant="h6" component="h1" gutterBottom>
-					Something completely different!
-				</Typography>
 				<p>
 					Welcome the the rebirth ... re-emergence ... re-something of<br />
 					<strong><Link color="inherit" href="http://harmonagon.com/">The Harmonagon Project</Link></strong>

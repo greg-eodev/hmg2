@@ -21,7 +21,7 @@ const Copyright = () => {
 		<Typography variant="body2" color="white" align="center">
 			{"Copyright © 2016 - "}
 			{new Date().getFullYear()}
-			&nbsp;The StepTunes Initiative.
+			&nbsp;StepTunes Collective
 		</Typography>
 	);
 }

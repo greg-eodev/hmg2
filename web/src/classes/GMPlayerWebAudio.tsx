@@ -1,4 +1,4 @@
-import GMPlayer, { IOptions } from "./AbstractGMPlayer";
+import GMPlayer, { IOptions, INoteOptions } from "./AbstractGMPlayer";
 import { IAudioSupport } from "./GM";
 /**
  * #### StepTunes General MIDI Web Audio Player
@@ -7,6 +7,8 @@ import { IAudioSupport } from "./GM";
  * TODO: specific for webAudio player => abstract getContext (): void; 
  * TODO: getContext() should return context it seems
  * TODO: specific for webAudio player => abstract setContext (newCtx: number, onload: Function, onprogress: Function, onerror: Function): void;
+ * 
+ * TODO: make sure nodes are getting garbage collected so we don't end up out of memory
  */
 interface IAudioBuffer {
 	[index: string]: any;
@@ -15,15 +17,19 @@ interface IAudioBuffer {
 class GMPlayerWebAudio extends GMPlayer {
 	private _audioSupport: IAudioSupport;
 	private _keyString: string;
+	private _activeNoteFaders: Array<number>;
 	public audioBuffers: IAudioBuffer;
 	public context: any;
+	public gainNodes: Array<any>;
 
 	constructor (audioSupport: IAudioSupport) {
 		super();
 		
 		this._keyString = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+		this._activeNoteFaders = [];
 		this._audioSupport = audioSupport;
 		this.audioBuffers = {};
+		this.gainNodes = [];
 		if (this._audioSupport.webAudio) {
 			/**
 			 * support for cross browser compatability - although all browsers now support
@@ -118,32 +124,91 @@ class GMPlayerWebAudio extends GMPlayer {
 	public generateAudioBufferId = (instrumentId: number, note: string) => {
 		return instrumentId.toString() + note;
 	}
+/**
+ *
+ *
+ * @param gainNode
+ * @param delay
+ * @param rampTime
+ */
+public addNoteFade = (gainNode: any, delay: number, rampTime: number) => {
+		const timerId = setTimeout(() => {
+			/**
+			 * deQueue Fade Timer ID from the Fade Timers queue because it has expired
+			 */
+			this._activeNoteFaders.shift();
+			/**
+			 * Apply the Fade using https://developer.mozilla.org/en-US/docs/Web/API/AudioParam/exponentialRampToValueAtTime
+			 */
+			gainNode.gain.exponentialRampToValueAtTime(0.01, rampTime);
+		}, delay * 1000);
+		/**
+		 * enQueue Fade Timer ID to the Fade Timers queue 
+		 */
+		this._activeNoteFaders.push(timerId as unknown as number);
+	}
 
 	public send = (data: any, delay: number): void => { };
 	public setController = (channelId: number, type: string, value: number, delay: number): void => { };
 	public setVolume = (channelId: number, volume: number, delay: number): void => { };
 	public programChange = (channelId: number, program: number, delay: number): void => { };
 	public pitchBend = (channelId: number, program: number, delay: number): void => { };
-
-	public noteOn = (instrumentId: number, note: string, velocity: number, delay: number = 0, duration: number = 1.5): void => {
-		delay += this.context.currentTime;
-
-		const bufferId = this.generateAudioBufferId(instrumentId, note);
+/**
+ *
+ *
+ * @param instrumentId
+ * @param note
+ * @param velocity
+ * @param [delay=0]
+ * @param [duration=1.5]
+ * @returns {*} 
+ */
+//public noteOn = (instrumentId: number, note: string, velocity: number, delay: number = 0, duration: number = 1.5): void => {
+public noteOn = (options: INoteOptions): void => {
+		const bufferId = this.generateAudioBufferId(options.instrumentId, options.note);
 		if (!this.audioBuffers[bufferId]) {
  			console.error("No Buffer Found for ID =", bufferId);
 			return;
 		}
 
+		const gainNode = this.context.createGain();
+		this.gainNodes.push(gainNode);
 		const source = this.context.createBufferSource();
 		source.buffer = this.audioBuffers[bufferId];
-		source.connect(this.context.destination);
-		source.start(delay, 0, duration);
+		/**
+		 * build the Audio Graph 
+		 */
+		source.connect(gainNode);
+		gainNode.connect(this.context.destination);
+		gainNode.gain.setValueAtTime(1.0, this.context.currentTime);
+		source.start((options.delay + this.context.currentTime), 0, options.duration);
+		/**
+		 * should we fade? if so, make sure the duration of the note is longer than the fade time - otherwise ignore fade 
+		 */
+		if (options.shouldFade && options.duration > options.fadeDuration) {
+			this.addNoteFade(gainNode, (options.delay + options.duration - options.fadeDuration), options.fadeDuration);
+		}
 	};
 
 	public noteOff = (channelId: number, noteId: string, delay: number): void => { };
 	public chordOn = (channelId: number, chord: string, velocity: number, delay: number): void => { };
 	public chordOff = (channelId: number, chord: string, delay: number): void => { };
-	public stopAllNotes = (): void => { };
+	public stopAllNotes = (): void => { 
+		/**
+		 * clear and remove all fade timers remaining
+		 */
+		this._activeNoteFaders.forEach((timeoutId: number) => {
+			window.clearTimeout(timeoutId);
+		});
+		this._activeNoteFaders = [];
+		/**
+		 * mute all audioBuffers
+		 */
+		this.gainNodes.forEach((gainNode: any) => {
+			gainNode.gain.setValueAtTime(0.0, this.context.currentTime);
+		});
+		this.gainNodes = [];
+	};
 
 	public connect = (options: IOptions): void => {
 		const MIDI = window.MIDI; 

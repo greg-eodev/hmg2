@@ -3,16 +3,16 @@ import { useEffect } from "react";
 /**
  * HMG
  */
-import { setMidiEngine, loadSoundFont, ISoundFontPayload, loadSoundFontComplete, channelActivate, IChannelActivatePayload, channelActivationComplete} from "../slices/midiPlayerSlice";
+import { setMidiEngine, channelActivate, IChannelActivatePayload, channelActivationComplete, asyncLoadSoundFont} from "../slices/midiPlayerSlice";
 import { useAppSelector, useAppDispatch } from "../hooks/hooks"
 
 const MidiPlayer = () => {
 	const isAvailable = useAppSelector((state) => state.midi.isAvailable);
 	const isLoaded = useAppSelector((state) => state.midi.isLoaded);
 	const isLoading = useAppSelector((state) => state.midi.isLoading);
+	const baseUrl = useAppSelector((state) => state.midi.baseUrl);
 	const channels = useAppSelector((state) => state.midi.channels);
 	const dispatch = useAppDispatch();
-	let soundFontCount: number;
 	let loadedSoundFontCount: number;
 	/**
 	 * When page loads create the player on the DOM
@@ -31,22 +31,12 @@ const MidiPlayer = () => {
 	 * TODO: Set format based on canPlayType
 	 */
 	if (isAvailable && !isLoaded && !isLoading) {
-		//const audioSupport = window.MIDI.getAudioSupport();
-		const payload: ISoundFontPayload = {
-			fontFamily: "fat-boy",
-			instrument: ["tenor_sax", "french_horn"],
-			format: "mp3",
-			compressed: false,
-			"loadCallback": () => {
-				--soundFontCount;
-				if (soundFontCount <= 0) {
-					dispatch(loadSoundFontComplete());
-				} 
-			}
-		}
-		soundFontCount = payload.instrument.length;
-		dispatch(loadSoundFont(payload));
-
+		const instruments = ["tenor_sax", "french_horn"];
+		let soundSource: string;
+		instruments.forEach((instrument) => {
+			soundSource = `${baseUrl}/fat-boy/${instrument}-mp3.js`;
+			dispatch(asyncLoadSoundFont(soundSource));
+		});
 	} else if (isAvailable && isLoaded && !channels[0].areAudioBuffersLoading && !channels[0].areAudioBuffersLoaded) {
 		const payload: IChannelActivatePayload = {
 			channelId: 0,
