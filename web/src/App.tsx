@@ -266,7 +266,7 @@ const App = () => {
 		<Container maxWidth="lg">
 			<Box>
 				<Typography variant="h4" component="h1" gutterBottom>
-					StepTunes
+					StepTunes v1
 				</Typography>				
 				<p>
 					Welcome the the rebirth ... re-emergence ... re-something of<br />
