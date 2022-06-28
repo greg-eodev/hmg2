@@ -30,8 +30,8 @@ const MidiPlayer = () => {
 	 * 
 	 * TODO: Set format based on canPlayType
 	 */
+	const instruments = ["tenor_sax", "french_horn"];
 	if (isAvailable && !isLoaded && !isLoading) {
-		const instruments = ["tenor_sax", "french_horn"];
 		let soundSource: string;
 		instruments.forEach((instrument) => {
 			soundSource = `${baseUrl}/fat-boy/${instrument}-mp3.js`;
@@ -40,10 +40,7 @@ const MidiPlayer = () => {
 	} else if (isAvailable && isLoaded && !channels[0].areAudioBuffersLoading && !channels[0].areAudioBuffersLoaded) {
 		const payload: IChannelActivatePayload = {
 			channelId: 0,
-			soundFonts: [
-				"tenor_sax", 
-				"french_horn"
-			],
+			soundFonts: instruments,
 			"loadCallback": () => {
 				--loadedSoundFontCount;
 				if (loadedSoundFontCount <= 0) {
